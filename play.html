@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Wonder Games – Controller</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="Wonderlight Studios logo.jpeg">
+  <style>
+    .gm-fab {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: var(--bg-surface);
+      border: 1.5px solid var(--border);
+      box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 1000;
+      transition: all 0.2s ease;
+    }
+
+    .gm-fab:hover {
+      border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      transform: rotate(12deg) scale(1.05);
+    }
+
+
+    .join-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      animation: fadeUp 0.4s ease;
+    }
+
+    .phone-stage {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(34, 211, 165, 0.06));
+      border: 1px solid rgba(124, 58, 237, 0.25);
+      border-radius: var(--radius-lg);
+      padding: 28px 22px;
+      text-align: center;
+      margin-top: 16px;
+      animation: fadeUp 0.35s ease;
+    }
+
+    .phone-stage h2 {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 26px;
+      color: #a78bfa;
+      margin-bottom: 10px;
+    }
+
+    .phone-stage p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.7;
+      font-weight: 600;
+    }
+
+    .phone-timer {
+      margin-top: 18px;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 56px;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--neon-yellow), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .big-challenge-btn {
+      width: 100%;
+      height: 300px;
+      font-size: 50px;
+      font-family: 'Fredoka One', sans-serif;
+      border-radius: 30px;
+      margin-top: 20px;
+      border: none;
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 10px 0 #5b21b6;
+      transition: all 0.1s;
+      cursor: pointer;
+    }
+    .big-challenge-btn:active {
+      transform: translateY(4px);
+      box-shadow: 0 6px 0 #5b21b6;
+    }
+    .big-challenge-btn.clicked {
+      background: #4b5563;
+      box-shadow: none;
+      transform: translateY(10px);
+      pointer-events: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- GM FAB top-right -->
+  <div class="gm-fab" id="gmFab" onclick="window.location.href='gamemaster.html'" title="Game Master">✏️</div>
+
+  <div class="container">
+
+    <div id="errorMessage" class="message error hidden">🔥 Firestore fout</div>
+
+
+
+    <!-- ── ROOM CODE INPUT ──────────────────────── -->
+    <div id="roomCodeScreen" class="join-card" style="max-width: 400px; margin: 40px auto;">
+      <div style="margin-bottom: 24px;">
+        <h2 style="font-size: 26px; margin-bottom: 4px;">🔐 Kamer Code</h2>
+        <p style="color: var(--text-muted); font-size: 13px; font-weight: 600;">Vraag de Game Master om de code</p>
+      </div>
+      <div class="form-group">
+        <label for="roomCodeInput">Voer de kamer code in</label>
+        <input type="text" id="roomCodeInput" placeholder="6 tekens" maxlength="6" autocomplete="off"
+          style="text-transform: uppercase; letter-spacing: 0.2em; font-size: 18px; font-weight: 700; text-align: center; font-family: 'Fredoka One';">
+      </div>
+      <div id="roomCodeError" class="message error hidden"></div>
+      <button class="primary" onclick="validateAndProceedRoomCode()" style="width: 100%;">▶️ Volgende</button>
+    </div>
+
+    <!-- ── JOIN FORM ─────────────────────────── -->
+    <div id="joinForm" class="join-card">
+      <div style="margin-bottom:24px;">
+        <h2 style="font-size:26px;margin-bottom:4px;">📱 Meedoen</h2>
+        <p style="color:var(--text-muted);font-size:13px;font-weight:600;">Kies je naam en avatar</p>
+      </div>
+      <div id="lockedMsg" class="message error hidden">🔒 Game already started – nieuwe spelers kunnen nu niet meer
+        joinen.</div>
+      <div class="form-group">
+        <label for="playerName">Jouw naam</label>
+        <input type="text" id="playerName" placeholder="Voer je naam in" maxlength="20" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Kies je avatar</label>
+        <div class="icon-selector" id="iconSelector">
+          <div class="icon-option" data-icon="🦸" onclick="selectIcon(this)">🦸</div>
+          <div class="icon-option" data-icon="🎮" onclick="selectIcon(this)">🎮</div>
+          <div class="icon-option" data-icon="👨‍🚀" onclick="selectIcon(this)">👨‍🚀</div>
+          <div class="icon-option" data-icon="🦹" onclick="selectIcon(this)">🦹</div>
+          <div class="icon-option" data-icon="🧙" onclick="selectIcon(this)">🧙</div>
+          <div class="icon-option" data-icon="🥷" onclick="selectIcon(this)">🥷</div>
+          <div class="icon-option" data-icon="🤖" onclick="selectIcon(this)">🤖</div>
+          <div class="icon-option" data-icon="👽" onclick="selectIcon(this)">👽</div>
+          <div class="icon-option" data-icon="🐉" onclick="selectIcon(this)">🐉</div>
+          <div class="icon-option" data-icon="🦊" onclick="selectIcon(this)">🦊</div>
+          <div class="icon-option" data-icon="🦁" onclick="selectIcon(this)">🦁</div>
+          <div class="icon-option" data-icon="🐼" onclick="selectIcon(this)">🐼</div>
+        </div>
+      </div>
+      <div class="flex-row">
+        <button class="primary" onclick="joinGame()">✅ Meedoen!</button>
+        <button class="secondary" onclick="window.location.href='index.html'">← Terug</button>
+      </div>
+    </div>
+
+    <!-- ── PLAYER PANEL ──────────────────────── -->
+    <div id="playerPanel" class="hidden">
+      <div id="playerHeader" style="text-align:center;padding:12px 0 20px;">
+        <div id="pAvatar"
+          style="font-size:80px;filter:drop-shadow(0 0 20px rgba(124,58,237,0.5));animation:float 3.5s ease-in-out infinite;margin-bottom:8px;">
+        </div>
+        <div id="pName" style="font-family:'Fredoka One',sans-serif;font-size:28px;"></div>
+        
+        <!-- Secret Mission Button -->
+        <div id="secretMissionSection" style="margin-top: 15px;">
+          <button id="btnSecretHold" class="secondary"
+            style="width:80%; padding:15px; font-size:16px; font-family:'Fredoka One'; border-radius:15px; user-select:none; -webkit-user-select:none;"
+            onmousedown="showSecretMission()" onmouseup="hideSecretMission()" ontouchstart="showSecretMission()"
+            ontouchend="hideSecretMission()">
+            🤫 HOUD VAST VOOR GEHEIME MISSIE
+          </button>
+          <div id="secretMissionContent" class="hidden"
+            style="margin-top:10px; padding:15px; background:rgba(251,191,36,0.1); border-radius:12px; border:2px dashed #fbbf24; color: #fbbf24; font-weight: 700; font-size: 18px;">
+            ???
+          </div>
+        </div>
+
+        <div style="color:var(--text-muted);font-size:13px;font-weight:700;margin-top:2px;">Verbonden ✓</div>
+      </div>
+      <div id="playerStatus"
+        style="background:var(--bg-surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;margin:14px 0;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div
+            style="width:8px;height:8px;border-radius:50%;background:var(--neon-green);box-shadow:0 0 8px var(--neon-green);animation:pulse 2s ease infinite;">
+          </div>
+          <span style="font-size:13px;font-weight:700;color:var(--text-muted);">Status</span>
+        </div>
+        <div id="pStatus" style="font-size:13px;font-weight:700;color:var(--text);"></div>
+      </div>
+
+      <!-- Phone game card -->
+      <div id="phoneStage" class="phone-stage hidden">
+        <h2 id="psTitle"></h2>
+        <p id="psText"></p>
+        <!-- Ready (page 4) -->
+        <div id="readyWrap" class="hidden" style="margin-top:20px;">
+          <button class="success" id="readyBtn" onclick="toggleReady()"
+            style="width:100%;padding:18px;font-size:18px;">✅ Ik ben Klaar!</button>
+        </div>
+        <!-- Timer (active minigame) -->
+        <div id="timerWrap" class="hidden">
+          <div
+            style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-top:18px;margin-bottom:4px;">
+            Tijd over</div>
+          <div class="phone-timer" id="phoneTimer">00:00</div>
+        </div>
+
+        <!-- Imposter Reveal -->
+        <div id="imposterReveal" class="hidden" style="margin-top:20px;">
+          <button id="btnRevealHold" class="primary"
+            style="width:100%; padding:30px; font-size:20px; font-family:'Fredoka One'; border-radius:20px; user-select:none; -webkit-user-select:none;"
+            onmousedown="showImposterRole()" onmouseup="hideImposterRole()" ontouchstart="showImposterRole()"
+            ontouchend="hideImposterRole()">
+            👀 HOUD VAST OM ROL TE ZIEN
+          </button>
+          <div id="imposterContent" class="hidden"
+            style="margin-top:20px; padding:20px; background:rgba(124,58,237,0.1); border-radius:15px; border:2px dashed var(--accent);">
+            <div style="font-size:12px; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Jouw
+              geheime rol:</div>
+            <div id="imposterRoleText" style="font-size:32px; font-family:'Fredoka One'; color:var(--accent);">???</div>
+          </div>
+        </div>
+
+        <!-- Imposter Voting -->
+        <div id="imposterVote" class="hidden" style="margin-top:20px;">
+          <div id="imposterVoteList" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+
+        <!-- TimeGuesser Challenge -->
+        <div id="timeGuesserUI" class="hidden">
+          <div id="tgCountdown" style="font-size: 100px; font-family: 'Fredoka One'; margin-top: 20px; color: var(--accent);" class="hidden">3</div>
+          <div id="tgActive" class="hidden">
+            <button id="tgBtn" class="big-challenge-btn" onclick="submitTimeGuesserClick()">NU KLIKKEN!</button>
+          </div>
+          <div id="tgResult" class="hidden" style="margin-top: 30px; font-size: 24px; font-weight: 700; color: var(--text-muted);">
+            GEKLIKT!<br><span style="font-size: 16px;">Wacht op de uitslag...</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    // Check if user is logged in
+    if (!isUserLoggedIn()) {
+      window.location.href = "index.html";
+    }
+
+    // Add logout button to UI
+    const logoutBtn = document.createElement("button");
+    logoutBtn.innerHTML = "🚪 Logout";
+    logoutBtn.className = "logout-btn";
+    logoutBtn.style.cssText = `
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      padding: 8px 16px;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+      z-index: 999;
+      transition: all 0.2s ease;
+    `;
+    logoutBtn.onmouseover = () => {
+      logoutBtn.style.borderColor = "var(--neon-pink)";
+      logoutBtn.style.color = "var(--neon-pink)";
+    };
+    logoutBtn.onmouseout = () => {
+      logoutBtn.style.borderColor = "var(--border)";
+      logoutBtn.style.color = "var(--text-muted)";
+    };
+    logoutBtn.onclick = logoutUser;
+    document.body.appendChild(logoutBtn);
+  </script>
+  <script>
+    let selectedIcon = "";
+    let currentPlayerName = "";
+    let currentGameState = null;
+    let phoneTimerInterval = null;
+    let roomCodeValidated = false;
+    let allPlayers = [];
+
+    /* ─── INIT ────────────────────────────────── */
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ensureGameState();
+
+      // Check if user is already a player in the current game
+      const myName = getDisplayName();
+      const exists = await checkPlayerExists(myName);
+
+      if (exists) {
+        currentPlayerName = myName;
+        roomCodeValidated = true;
+
+        // Haal icon op uit Firestore
+        const pSnap = await db.collection("players").doc(playerDocId(myName)).get();
+        if (pSnap.exists) {
+          selectedIcon = pSnap.data().icon;
+          document.getElementById("pAvatar").textContent = selectedIcon;
+        }
+
+        document.getElementById("roomCodeScreen").classList.add("hidden");
+        document.getElementById("joinForm").classList.add("hidden");
+        document.getElementById("playerPanel").classList.remove("hidden");
+        document.getElementById("pName").textContent = myName;
+      } else {
+        // Show room code screen by default
+        document.getElementById("roomCodeScreen").classList.remove("hidden");
+        document.getElementById("joinForm").classList.add("hidden");
+
+        // Pre-fill name and disable
+        const nameInput = document.getElementById("playerName");
+        nameInput.value = myName;
+        nameInput.disabled = true;
+        nameInput.style.background = "var(--bg-surface)";
+        nameInput.style.opacity = "0.7";
+      }
+
+      listenToGameState((state) => {
+        currentGameState = state;
+        updatePhoneState(state);
+        document.getElementById("lockedMsg").classList.toggle("hidden", !state.isLocked);
+      });
+      listenToPlayers((players) => {
+        allPlayers = players;
+        if (currentGameState && currentGameState.activeGameId === "Imposter" && currentGameState.minigameState?.status === "voting") {
+          renderImposterVoting();
+        }
+      });
+    });
+
+    function listenToRoomCode() {
+      listenToGameState((state) => {
+        // Only update if we are not in joinForm or playerPanel yet
+        if (!roomCodeValidated) {
+          // No action needed here usually, but keeping it for consistency
+        }
+      });
+    }
+
+    async function validateAndProceedRoomCode() {
+      const inputCode = document.getElementById("roomCodeInput").value.trim().toUpperCase();
+      const errorEl = document.getElementById("roomCodeError");
+
+      if (!inputCode) {
+        errorEl.textContent = "Voer de code in";
+        errorEl.classList.remove("hidden");
+        return;
+      }
+
+      const isValid = await validateRoomCode(inputCode);
+      if (isValid) {
+        errorEl.classList.add("hidden");
+        roomCodeValidated = true;
+        document.getElementById("roomCodeScreen").classList.add("hidden");
+        document.getElementById("joinForm").classList.remove("hidden");
+      } else {
+        errorEl.textContent = "Ongeldige code. Probeer opnieuw.";
+        errorEl.classList.remove("hidden");
+      }
+    }
+
+    /* ─── ICON ────────────────────────────────── */
+    function selectIcon(el) {
+      document.querySelectorAll(".icon-option").forEach((o) => o.classList.remove("selected"));
+      el.classList.add("selected");
+      selectedIcon = el.dataset.icon;
+    }
+
+    /* ─── JOIN ────────────────────────────────── */
+    async function joinGame() {
+      const input = document.getElementById("playerName");
+      const name = input.value.trim();
+      if (!name) { flash(input, "borderColor", "var(--neon-pink)"); return; }
+      if (!selectedIcon) { flash(document.getElementById("iconSelector"), "outline", "2px solid var(--neon-pink)"); return; }
+      const state = await getGameState();
+      if (state && state.isLocked) { document.getElementById("lockedMsg").classList.remove("hidden"); return; }
+      currentPlayerName = name;
+      await addPlayer(name, selectedIcon);
+      document.getElementById("joinForm").classList.add("hidden");
+      document.getElementById("playerPanel").classList.remove("hidden");
+      document.getElementById("pAvatar").textContent = selectedIcon;
+      document.getElementById("pName").textContent = name;
+      if (currentGameState && currentGameState.status !== "lobby") updatePhoneState(currentGameState);
+    }
+
+    function flash(el, prop, val) {
+      el.style[prop] = val;
+      setTimeout(() => { el.style[prop] = ""; }, 1400);
+    }
+
+    async function leaveGame() {
+      if (!currentPlayerName) return;
+      clearInterval(phoneTimerInterval);
+      await removePlayer(currentPlayerName);
+      currentPlayerName = "";
+      selectedIcon = "";
+      document.getElementById("playerPanel").classList.add("hidden");
+      document.getElementById("joinForm").classList.remove("hidden");
+      document.getElementById("playerName").value = "";
+      document.querySelectorAll(".icon-option").forEach((o) => o.classList.remove("selected"));
+      document.getElementById("phoneStage").classList.add("hidden");
+    }
+
+    /* ─── PHONE STATE ─────────────────────────── */
+    function updatePhoneState(state) {
+      if (!currentPlayerName) return;
+      const stage = document.getElementById("phoneStage");
+      const psTitle = document.getElementById("psTitle");
+      const psText = document.getElementById("psText");
+      const pStatus = document.getElementById("pStatus");
+      const readyWrap = document.getElementById("readyWrap");
+      const timerWrap = document.getElementById("timerWrap");
+      const playerHeader = document.getElementById("playerHeader");
+      const playerStatus = document.getElementById("playerStatus");
+
+      clearInterval(phoneTimerInterval);
+      readyWrap.classList.add("hidden");
+      timerWrap.classList.add("hidden");
+      document.getElementById("imposterReveal").classList.add("hidden");
+      document.getElementById("timeGuesserUI").classList.add("hidden");
+
+      // Hide player info only when a minigame is actively being explained or played
+      const isMinigameActive = state && state.activeGameId && (state.gamePhase === "active" || state.gamePhase === "explanation" || state.gamePhase === "ready");
+      const logoutBtn = document.querySelector('.logout-btn');
+      if (isMinigameActive) {
+        playerHeader.style.display = "none";
+        playerStatus.style.display = "none";
+        if (logoutBtn) logoutBtn.style.display = "none";
+      } else {
+        playerHeader.style.display = "block";
+        playerStatus.style.display = "flex";
+        if (logoutBtn) logoutBtn.style.display = "block";
+      }
+
+      if (!state || state.status === "lobby" || (state.status === "playing" && !state.activeGameId && state.gamePhase !== "story")) {
+        pStatus.textContent = "Wachten op Game Master...";
+        stage.classList.add("hidden");
+        return;
+      }
+      stage.classList.remove("hidden");
+
+      // RESET ALL GAME-SPECIFIC UI
+      document.getElementById("imposterReveal").classList.add("hidden");
+      document.getElementById("imposterVote").classList.add("hidden");
+      document.getElementById("imposterContent").classList.add("hidden");
+      timerWrap.classList.add("hidden");
+      timerWrap.style.display = "none";
+
+      if (state.gamePhase === "ended" && (state.activeGameId !== "Imposter" || state.minigameState?.status === "ended")) {
+        pStatus.textContent = "Spel afgelopen!";
+        psTitle.textContent = "⏰ Tijd is om!";
+        psText.textContent = "De Game Master telt de scores. Wacht op de volgende ronde!";
+        return;
+      }
+      if (state.gamePhase === "active") {
+        pStatus.textContent = "🎮 Minigame bezig!";
+        psTitle.textContent = state.activeGameName || "Minigame";
+
+        const isSpecial = state.activeGameId === "HideAndSeek" || state.activeGameId === "Imposter";
+        const hasSpecificData = state.minigameState && state.minigameState.type === state.activeGameId;
+        psText.textContent = (isSpecial && !hasSpecificData) ? "Even geduld... rol bepalen" : (state.message || "Speel nu!");
+
+        if (state.activeGameId === "HideAndSeek" && state.minigameState) {
+          psTitle.textContent = `Zoek: ${state.minigameState.targetObject}`;
+          psText.textContent = `Ronde ${state.minigameState.round}/5. Breng het voorwerp naar de Game Master!`;
+        }
+
+        if (state.activeGameId === "Imposter" && state.minigameState) {
+          const ms = state.minigameState;
+          if (ms.status === "reveal") {
+            psTitle.textContent = "🤫 Jouw Geheime Rol";
+            psText.textContent = "Houd de knop hieronder ingedrukt om je woord te zien.";
+            document.getElementById("imposterReveal").classList.remove("hidden");
+
+            const role = ms.imposterName === currentPlayerName ? "Jij bent de IMPOSTER! 🕵️" : `Het woord is: ${ms.word}`;
+            document.getElementById("imposterRoleText").textContent = role;
+          } else if (ms.status === "discussion") {
+            psTitle.textContent = "💬 Discussie";
+            psText.textContent = "Praat met de anderen. Probeer de Imposter te ontmaskeren (of speel mee als je de Imposter bent!)";
+          } else if (ms.status === "voting") {
+            const isImposter = ms.imposterName === currentPlayerName;
+            psTitle.textContent = "🗳️ Wie is de Imposter?";
+            
+            // Check if already voted
+            db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
+              const data = doc.data() || {};
+              if (data.votedFor) {
+                psText.textContent = "Je hebt gestemd! Wacht op de resultaten...";
+                document.getElementById("imposterVote").classList.add("hidden");
+              } else if (isImposter) {
+                psText.textContent = "Jij bent de Imposter! Jij kunt niet stemmen. Probeer onschuldig te lijken!";
+                document.getElementById("imposterVote").classList.add("hidden");
+              } else {
+                psText.textContent = "Tik op de naam van de persoon die jij denkt dat liegt.";
+                document.getElementById("imposterVote").classList.remove("hidden");
+                renderImposterVoting();
+              }
+            });
+          }
+        }
+
+        if (state.activeGameId !== "Imposter" && state.activeGameId !== "TimeGuesser") {
+          timerWrap.classList.remove("hidden");
+          timerWrap.style.display = "block";
+          if (state.timerEnd) startPhoneTimer(state.timerEnd);
+        } else {
+          // Explicitly hide for Imposter/TimeGuesser
+          timerWrap.classList.add("hidden");
+          timerWrap.style.display = "none";
+          if (state.timerEnd) startPhoneTimer(state.timerEnd);
+        }
+
+        if (state.activeGameId === "TimeGuesser") {
+          document.getElementById("timeGuesserUI").classList.remove("hidden");
+          if (state.gamePhase === "countdown") {
+            document.getElementById("psText").textContent = "Maak je klaar!";
+            const cd = document.getElementById("tgCountdown");
+            cd.classList.remove("hidden");
+            cd.textContent = state.countdownValue || "3";
+            document.getElementById("tgActive").classList.add("hidden");
+          } else if (state.gamePhase === "active") {
+            document.getElementById("psText").textContent = "Tellen maar...";
+            document.getElementById("tgCountdown").classList.add("hidden");
+            
+            // Check if we already clicked
+            db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
+              const res = doc.data().timeResult;
+              if (res) {
+                document.getElementById("tgActive").classList.add("hidden");
+                document.getElementById("tgResult").classList.remove("hidden");
+              } else {
+                document.getElementById("tgActive").classList.remove("hidden");
+                document.getElementById("tgResult").classList.add("hidden");
+              }
+            });
+          }
+        }
+        return;
+      }
+      if (state.gamePhase === "explanation" || state.gamePhase === "ready") {
+        const isExp = state.gamePhase === "explanation";
+        pStatus.textContent = isExp ? "📋 Lees de uitleg!" : "⚡ Ben je klaar?";
+        psTitle.textContent = state.activeGameName || (isExp ? "Uitleg" : "Klaar voor de start?");
+        psText.textContent = isExp ? (state.message || "") : "Druk op de knop als je klaar bent!";
+        
+        readyWrap.classList.remove("hidden");
+        db.collection("players").doc(playerDocId(currentPlayerName)).get().then((doc) => {
+          if (!doc.exists) return;
+          const r = doc.data().ready;
+          document.getElementById("readyBtn").textContent = r ? "⏳ Wachten..." : "✅ Ik ben Klaar!";
+          document.getElementById("readyBtn").className = r ? "warning" : "success";
+        });
+        return;
+      }
+      const pages = {
+        1: { title: "🎉 Welkom bij dit leuke spel!", text: "Fijn dat je er bent! Bereid je voor op een gezellige avond." },
+        2: { title: "📋 Opdrachten", text: "Zometeen krijgen jullie een opdracht te zien. Het team dat de opdracht het beste uitvoert krijgt een punt!" },
+        3: { title: "🎮 Wat kun je verwachten?", text: "Jullie kunnen op de telefoon spelletjes krijgen... of een opdracht in het echte leven!" }
+      };
+      const page = pages[state.page] || { title: `Pagina ${state.page}`, text: state.message || "" };
+      pStatus.textContent = `Pagina ${state.page}`;
+      psTitle.textContent = page.title;
+      psText.textContent = page.text;
+    }
+
+    function startPhoneTimer(timerEnd) {
+      const display = document.getElementById("phoneTimer");
+      function tick() {
+        const rem = Math.max(0, Math.round((timerEnd - Date.now()) / 1000));
+        display.textContent = `${String(Math.floor(rem / 60)).padStart(2, "0")}:${String(rem % 60).padStart(2, "0")}`;
+        if (rem <= 0) clearInterval(phoneTimerInterval);
+      }
+      tick();
+      phoneTimerInterval = setInterval(tick, 400);
+    }
+
+    async function toggleReady() {
+      if (!currentPlayerName) return;
+      const snap = await db.collection("players").doc(playerDocId(currentPlayerName)).get();
+      if (!snap.exists) return;
+      const nowReady = !snap.data().ready;
+      await setPlayerReady(currentPlayerName, nowReady);
+      document.getElementById("readyBtn").textContent = nowReady ? "⏳ Wachten..." : "✅ Ik ben Klaar!";
+      document.getElementById("readyBtn").className = nowReady ? "warning" : "success";
+    }
+
+    function showImposterRole() {
+      if (!currentGameState || !currentGameState.minigameState) return;
+      const ms = currentGameState.minigameState;
+      const isImposter = ms.imposterName === currentPlayerName;
+      const textEl = document.getElementById("imposterRoleText");
+      const contentEl = document.getElementById("imposterContent");
+
+      textEl.textContent = isImposter ? "🕵️ JIJ BENT DE IMPOSTER!" : `🍞 ${ms.word}`;
+      textEl.style.color = isImposter ? "var(--neon-pink)" : "var(--accent)";
+      contentEl.classList.remove("hidden");
+      document.getElementById("btnRevealHold").textContent = "🔓 ROL ZICHTBAAR";
+    }
+
+    function hideImposterRole() {
+      document.getElementById("imposterContent").classList.add("hidden");
+      document.getElementById("btnRevealHold").textContent = "👀 HOUD VAST OM ROL TE ZIEN";
+    }
+
+    function renderImposterVoting() {
+      if (!allPlayers || !currentPlayerName) return;
+      const listEl = document.getElementById("imposterVoteList");
+      listEl.innerHTML = "";
+
+      const myDoc = allPlayers.find(p => p.name === currentPlayerName);
+      const myVote = myDoc ? myDoc.vote : null;
+
+      // Filter out self
+      const others = allPlayers.filter(p => p.name !== currentPlayerName);
+
+      others.forEach(p => {
+        const btn = document.createElement("button");
+        btn.className = (myVote === p.name) ? "primary" : "secondary";
+        btn.style.width = "100%";
+        btn.style.padding = "20px";
+        btn.style.fontSize = "40px"; // Large font as requested
+        btn.style.fontFamily = "'Fredoka One', sans-serif";
+        btn.style.borderRadius = "15px";
+        btn.style.display = "flex";
+        btn.style.alignItems = "center";
+        btn.style.justifyContent = "center";
+        btn.style.gap = "15px";
+
+        btn.innerHTML = `<span>${p.icon}</span> <span>${p.name}</span>`;
+        btn.onclick = () => submitPlayerVote(currentPlayerName, p.name);
+        listEl.appendChild(btn);
+      });
+    }
+
+    async function submitTimeGuesserClick() {
+      if (!currentGameState || !currentGameState.gameStartTime) return;
+      const elapsed = (Date.now() - currentGameState.gameStartTime) / 1000;
+      
+      // Score calculation: 17.5s - 22.5s
+      const isWinner = elapsed >= 17.5 && elapsed <= 22.5;
+      const score = isWinner ? 1 : 0;
+      
+      document.getElementById("tgActive").classList.add("hidden");
+      document.getElementById("tgResult").classList.remove("hidden");
+      
+      await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+        timeResult: elapsed,
+        timeScore: score
+      });
+    }
+
+    function showSecretMission() {
+      if (!currentPlayerName) return;
+      const contentEl = document.getElementById("secretMissionContent");
+      const btn = document.getElementById("btnSecretHold");
+      
+      db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
+        if (doc.exists && doc.data().secretMission) {
+          contentEl.textContent = `🚀 MISSIE: ${doc.data().secretMission}`;
+          contentEl.classList.remove("hidden");
+          btn.textContent = "🔓 MISSIE ZICHTBAAR";
+        }
+      });
+    }
+
+    function hideSecretMission() {
+      document.getElementById("secretMissionContent").classList.add("hidden");
+      document.getElementById("btnSecretHold").textContent = "🤫 HOUD VAST VOOR GEHEIME MISSIE";
+    }
+
+
+  </script>
+</body>
+
+</html>

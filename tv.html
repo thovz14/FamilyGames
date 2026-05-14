@@ -1,0 +1,1865 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Wonder Games – TV Display</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="Wonderlight Studios logo.jpeg">
+  <style>
+    body {
+      overflow: hidden;
+    }
+
+    .team-lobby {
+      display: grid;
+      grid-template-columns: 450px 80px 450px;
+      justify-content: center;
+      height: auto;
+      align-items: start;
+      margin-top: 20px;
+    }
+
+    .team-side {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      padding: 20px;
+      gap: 12px;
+    }
+
+    .team-side.team-chickens {
+      align-items: flex-end;
+    }
+
+    .team-header {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .team-emoji {
+      font-size: 52px;
+    }
+
+    .team-label {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 32px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .team-wolves .team-label {
+      color: #a78bfa;
+    }
+
+    .team-chickens .team-label {
+      color: #fbbf24;
+    }
+
+    .team-score-big {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 80px;
+      line-height: 1;
+    }
+
+    .team-wolves .team-score-big {
+      color: #a78bfa;
+      text-shadow: 0 0 30px rgba(167, 139, 250, 0.4);
+    }
+
+    .team-chickens .team-score-big {
+      color: #fbbf24;
+      text-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+    }
+
+    .team-members {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+    }
+
+    .team-member-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      font-size: 18px;
+      font-weight: 700;
+      animation: playerIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .team-chickens .team-member-row {
+      flex-direction: row-reverse;
+    }
+
+    .team-member-icon {
+      font-size: 22px;
+    }
+
+    .team-no-members {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0.6;
+      padding: 12px 0;
+    }
+
+    .vs-col {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 48px;
+      color: var(--text-muted);
+      opacity: 0.35;
+    }
+
+    .tv-main>div {
+      grid-area: 1 / 1 / 2 / 2;
+      width: 100%;
+      height: 100%;
+    }
+
+    #teamsPanel {
+      z-index: 1;
+    }
+
+    .story-view,
+    .ready-view,
+    .active-view,
+    .timesup-view {
+      z-index: 5;
+      background: rgba(13, 15, 26, 0.9);
+      /* Semi-transparent dark background */
+      backdrop-filter: blur(8px);
+    }
+
+    .room-code-display-big {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 84px;
+      color: #a78bfa;
+      text-align: center;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-top: 20px;
+      animation: float 4s ease-in-out infinite;
+    }
+
+    .team-header {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 30px;
+      width: 100%;
+    }
+
+    .team-wolves .team-header {
+      justify-content: flex-start;
+    }
+
+    .team-chickens .team-header {
+      justify-content: flex-end;
+      flex-direction: row-reverse;
+    }
+
+    .team-label {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 42px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .team-score-next {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 64px;
+      margin-left: 20px;
+    }
+
+    /* ── READY CHECK VIEW ────────────────────────────────────── */
+    .ready-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100%;
+      padding: 28px 48px;
+      gap: 24px;
+    }
+
+    .ready-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 52px;
+      color: var(--text);
+      text-align: center;
+    }
+
+    .ready-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px 40px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .ready-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 20px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid var(--border);
+    }
+
+    .ready-player-icon {
+      font-size: 28px;
+    }
+
+    .ready-player-name {
+      font-size: 20px;
+      font-weight: 800;
+      flex: 1;
+    }
+
+    .ready-yes {
+      font-size: 14px;
+      font-weight: 800;
+      color: #4ade80;
+      white-space: nowrap;
+    }
+
+    .ready-no {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    /* ── STORY / TEXT PAGES ──────────────────────────────────── */
+    .story-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 48px 80px;
+      gap: 24px;
+      text-align: center;
+    }
+
+    .story-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(48px, 7vw, 84px);
+      background: linear-gradient(135deg, #a78bfa, var(--neon-green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.1;
+    }
+
+    .story-text {
+      font-size: clamp(20px, 2.8vw, 34px);
+      color: var(--text-muted);
+      max-width: 800px;
+      line-height: 1.65;
+      font-weight: 600;
+    }
+
+    /* ── ACTIVE MINIGAME ─────────────────────────────────────── */
+    .active-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px;
+      gap: 12px;
+      text-align: center;
+    }
+
+    .active-game-name {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(36px, 5vw, 60px);
+      color: var(--text);
+    }
+
+    .active-game-desc {
+      font-size: clamp(16px, 2.2vw, 26px);
+      color: var(--text-muted);
+      font-weight: 600;
+      max-width: 700px;
+    }
+
+    .big-timer {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(80px, 14vw, 160px);
+      line-height: 1;
+      background: linear-gradient(135deg, var(--neon-yellow), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-variant-numeric: tabular-nums;
+      margin-top: 16px;
+    }
+
+    /* ── TIME'S UP ───────────────────────────────────────────── */
+    .timesup-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px;
+      gap: 20px;
+      text-align: center;
+    }
+
+    .timesup-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: clamp(72px, 12vw, 140px);
+      color: var(--neon-pink);
+      text-shadow: 0 0 60px rgba(244, 63, 142, 0.5);
+      line-height: 1;
+    }
+
+    .timesup-sub {
+      font-size: clamp(20px, 3vw, 36px);
+      color: var(--text-muted);
+      font-weight: 600;
+      max-width: 700px;
+    }
+
+    /* ── TEAM SCORE CONTROLS (bottom bar) ────────────────────── */
+    .team-score-controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .team-score-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 6px 10px 6px 14px;
+      font-weight: 800;
+      font-size: 14px;
+    }
+
+    .team-score-pill.wolves {
+      border-color: rgba(167, 139, 250, 0.4);
+      color: #a78bfa;
+    }
+
+    .team-score-pill.chickens {
+      border-color: rgba(251, 191, 36, 0.4);
+      color: #fbbf24;
+    }
+
+    .tscore-val {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 22px;
+      min-width: 32px;
+      text-align: center;
+    }
+
+    .tscore-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 0;
+    }
+
+    .tscore-btn.minus {
+      background: rgba(244, 63, 142, 0.2);
+      color: var(--neon-pink);
+    }
+
+    .tscore-btn.plus {
+      background: rgba(34, 211, 165, 0.2);
+      color: var(--neon-green);
+    }
+
+    /* ── WINNER VIEW ─────────────────────────────────────────── */
+    .winner-view {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 40px;
+      text-align: center;
+      background: radial-gradient(circle, rgba(124, 58, 237, 0.2) 0%, rgba(13, 15, 26, 1) 100%);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .winner-label {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 42px;
+      color: var(--text-muted);
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+      animation: tracking-in-expand 0.7s cubic-bezier(0.215, 0.610, 0.355, 1.000) both;
+    }
+
+    .winner-team-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid var(--accent);
+      border-radius: 40px;
+      padding: 40px 80px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 100px rgba(124, 58, 237, 0.3);
+      animation: scale-up-center 0.5s cubic-bezier(0.390, 0.575, 0.565, 1.000) 0.5s both;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .winner-icon {
+      font-size: 120px;
+      filter: drop-shadow(0 0 20px var(--accent));
+      animation: bounce-in-fwd 1.1s both 1.1s;
+    }
+
+    .winner-name {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 84px;
+      text-transform: uppercase;
+      background: linear-gradient(135deg, #fff, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .winner-score {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--text-muted);
+    }
+
+    .winner-players {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 40px;
+      max-width: 1000px;
+    }
+
+    .winner-player-chip {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 20px;
+      font-size: 20px;
+      font-weight: 800;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    @keyframes tracking-in-expand {
+      0% {
+        letter-spacing: -0.5em;
+        opacity: 0;
+      }
+
+      40% {
+        opacity: 0.6;
+      }
+
+      100% {
+        opacity: 1;
+      }
+    }
+
+    @keyframes scale-up-center {
+      0% {
+        transform: scale(0.5);
+      }
+
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @keyframes bounce-in-fwd {
+      0% {
+        transform: scale(0);
+        animation-timing-function: ease-in;
+        opacity: 0;
+      }
+
+      38% {
+        transform: scale(1);
+        animation-timing-function: ease-out;
+        opacity: 1;
+      }
+
+      55% {
+        transform: scale(0.7);
+        animation-timing-function: ease-in;
+      }
+
+      72% {
+        transform: scale(1);
+        animation-timing-function: ease-out;
+      }
+
+      81% {
+        transform: scale(0.84);
+        animation-timing-function: ease-in;
+      }
+
+      89% {
+        transform: scale(1);
+        animation-timing-function: ease-out;
+      }
+
+      95% {
+        transform: scale(0.95);
+        animation-timing-function: ease-in;
+      }
+
+      100% {
+        transform: scale(1);
+        animation-timing-function: ease-out;
+      }
+    }
+
+
+    .tscore-btn:hover {
+      transform: scale(1.18);
+    }
+
+    /* ── ADMIN MODAL ─────────────────────────────────────────── */
+    .admin-modal-overlay {
+      display: none;
+      position: fixed;
+      z-index: 3000;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(8px);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .admin-modal-overlay.show {
+      display: flex;
+    }
+
+    .admin-modal-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      width: min(540px, 94vw);
+      max-height: 82vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6), 0 0 60px rgba(124, 58, 237, 0.15);
+      animation: modalIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .admin-section-label {
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      margin-top: 20px;
+    }
+
+    .player-assign-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin-bottom: 8px;
+    }
+
+    .player-assign-name {
+      flex: 1;
+      font-weight: 700;
+      font-size: 15px;
+    }
+
+    .team-btn {
+      padding: 7px 14px;
+      border-radius: 999px;
+      border: 1.5px solid;
+      font-size: 12px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .team-btn.wolves {
+      border-color: rgba(167, 139, 250, 0.5);
+      color: #a78bfa;
+      background: rgba(167, 139, 250, 0.08);
+    }
+
+    .team-btn.wolves.active {
+      background: rgba(167, 139, 250, 0.28);
+      border-color: #a78bfa;
+    }
+
+    .team-btn.chickens {
+      border-color: rgba(251, 191, 36, 0.5);
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.08);
+    }
+
+    .team-btn.chickens.active {
+      background: rgba(251, 191, 36, 0.28);
+      border-color: #fbbf24;
+    }
+
+    /* Story Animations & Extra Styles */
+    .pulse-icon {
+      animation: pulseGlow 2s infinite ease-in-out;
+    }
+
+    @keyframes pulseGlow {
+
+      0%,
+      100% {
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px var(--accent-glow));
+      }
+
+      50% {
+        transform: scale(1.1);
+        filter: drop-shadow(0 0 30px var(--accent-glow));
+      }
+    }
+
+    .float-icon {
+      animation: float 3s infinite ease-in-out;
+    }
+
+    .bounce-icon {
+      animation: bounce 2s infinite ease-in-out;
+    }
+
+    @keyframes bounce {
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+
+    .story-extra-box {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      width: 100%;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+      background: rgba(255, 255, 255, 0.05);
+      padding: 24px;
+      border-radius: 20px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      text-align: left;
+      animation: slideUp 0.6s ease-out;
+    }
+
+    .story-extra-item {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      font-size: 24px;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .story-extra-item b {
+      color: white;
+    }
+
+    .story-small-rule {
+      margin-top: 30px;
+      font-size: 18px;
+      opacity: 0.7;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Pause Overlay */
+    #pauseOverlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(10, 10, 20, 0.85);
+      backdrop-filter: blur(20px);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 40px;
+      color: white;
+      animation: fadeIn 0.4s ease;
+    }
+
+    .pause-hourglass {
+      font-size: 150px;
+      margin-bottom: 30px;
+      animation: rotateHourglass 7.5s infinite ease-in-out;
+    }
+
+    @keyframes rotateHourglass {
+
+      0%,
+      100% {
+        transform: rotate(0deg);
+      }
+
+      45%,
+      55% {
+        transform: rotate(180deg);
+      }
+    }
+
+    .pause-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 64px;
+      color: var(--accent);
+      margin-bottom: 20px;
+      text-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    .pause-text {
+      font-size: 32px;
+      color: var(--text-muted);
+      max-width: 900px;
+      line-height: 1.5;
+      font-weight: 600;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+    @keyframes birdHover {
+      0% { transform: translate(-20vw, 100px) rotate(10deg); }
+      20% { transform: translate(10vw, 300px) rotate(-5deg); }
+      40% { transform: translate(80vw, 150px) rotate(10deg); }
+      60% { transform: translate(20vw, 400px) rotate(-5deg); }
+      80% { transform: translate(70vw, 50px) rotate(10deg); }
+      100% { transform: translate(0vw, 10px) rotate(0deg); } /* Adjusted to be above timer in JS */
+    }
+    @keyframes birdFlyAway {
+      0% { transform: translate(0vw, 10px) rotate(0deg); }
+      100% { transform: translate(120vw, -100px) rotate(15deg); }
+    }
+    .bird-anim {
+      position: absolute;
+      font-size: 80px;
+      z-index: 1000;
+      pointer-events: none;
+      display: none;
+      color: #38bdf8; /* Blue bird */
+      text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+    }
+    .bird-anim.active {
+      display: block;
+      animation: birdHover 5s linear forwards;
+    }
+    .bird-anim.exit {
+      display: block;
+      animation: birdFlyAway 2s linear forwards;
+    }
+    .poop-drip-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+      z-index: 900;
+      border-radius: 20px;
+    }
+    .poop-drip {
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      height: 0;
+      background: #634021; /* Brown */
+      border-radius: 0 0 40px 40px;
+      transition: height 4s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+    }
+    .poop-drip.active {
+      height: calc(100% + 40px);
+    }
+    .poop-drip::after {
+      content: '💧';
+      position: absolute;
+      bottom: 0;
+      left: 20%;
+      font-size: 20px;
+      animation: dripFall 2s infinite;
+    }
+    @keyframes dripFall {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(100px); opacity: 0; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div id="errorMessageTV" class="message error hidden"
+    style="position:fixed; top:20px; left:50%; transform:translateX(-50%); z-index:10000;">🔥 Firestore fout</div>
+
+  <div id="pauseOverlay">
+    <div class="pause-hourglass">⌛</div>
+    <div class="pause-title">☕ Even pauze!</div>
+    <div class="pause-text">Neem wat te eten of drinken, we gaan zo weer verder.</div>
+  </div>
+
+  <div class="tv-layout">
+    <div class="tv-topbar" style="height: 140px; justify-content: center; position: relative;">
+      <div id="roomCodeDisplay" class="room-code-display-big">
+        <span id="tvRoomCode">----</span>
+      </div>
+    </div>
+
+    <div class="tv-main" style="padding:0;gap:0;overflow:hidden;">
+
+      <!-- TEAMS DISPLAY: altijd zichtbaar -->
+      <div id="teamsPanel" class="team-lobby" style="height:100%;overflow:hidden; grid-template-columns: 1fr 60px 1fr;">
+        <div class="team-side team-wolves">
+          <div class="team-header">
+            <span class="team-emoji">🐺</span>
+            <span class="team-label">De Wolven</span>
+            <span class="team-score-next team-wolves" id="wolvesScoreDisplayNext">0</span>
+          </div>
+          <div class="team-members" id="wolvesMembers">
+            <div class="team-no-members">Nog niemand...</div>
+          </div>
+        </div>
+        <div class="vs-col"></div>
+        <div class="team-side team-chickens">
+          <div class="team-header">
+            <span class="team-emoji">🐔</span>
+            <span class="team-label">De Kippen</span>
+            <span class="team-score-next team-chickens" id="chickensScoreDisplayNext">0</span>
+          </div>
+          <div class="team-members" id="chickensMembers">
+            <div class="team-no-members">Nog niemand...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STORY: plain text, no boxes -->
+      <div id="viewStory" class="story-view hidden">
+        <div id="storyIcon" style="font-size: 120px; margin-bottom: 30px;"></div>
+        <div class="story-title" id="storyTitle" style="font-size: 64px;"></div>
+        <div class="story-text" id="storyText" style="font-size: 28px; line-height: 1.4;">Wacht op de Game Master...
+        </div>
+
+        <div id="storyExtraArea" class="story-extra-box" style="display:none;"></div>
+        <div id="storySmallRule" class="story-small-rule" style="display:none;"></div>
+
+        <div id="storyReadyGrid" class="ready-grid" style="margin-top: 20px; width: 100%; max-width: 900px;"></div>
+      </div>
+
+      <!-- READY CHECK: two-column player list -->
+      <div id="viewReady" class="ready-view hidden">
+        <div class="ready-title" id="readyTitleText">⚡ Ben je klaar?</div>
+        <div class="ready-grid" id="readyGrid"></div>
+        <div id="readyMgName"
+          style="font-family:'Fredoka One'; font-size:42px; color:var(--accent); margin-top:40px; text-shadow: 0 0 20px var(--accent-glow);">
+        </div>
+        <div id="readyMgDesc"
+          style="font-size:24px; color:var(--text-muted); max-width:1000px; margin:10px auto; line-height:1.4; font-weight:600;">
+        </div>
+      </div>
+
+      <div id="viewBetween" class="story-view hidden">
+        <div class="story-title" id="betweenTitle">🥁 Tussenstand</div>
+        <div class="story-text" id="betweenText">Wacht op de Game Master...</div>
+        <div class="story-text" id="betweenSub" style="opacity:0.85;font-size:24px;margin-top:18px;">Stand wordt
+          geladen...</div>
+      </div>
+
+      <!-- ACTIVE MINIGAME: name + desc + big timer -->
+      <div id="viewActive" class="active-view hidden">
+        <div id="standardActiveUI">
+          <div class="active-game-name" id="activeGameName">Minigame</div>
+          <div class="active-game-desc" id="activeGameDesc"></div>
+        </div>
+
+        <div id="hideAndSeekTVUI" style="display:none; text-align:center;">
+          <div style="font-family:'Fredoka One'; font-size:42px; color:var(--accent); margin-bottom:10px;">
+            Ronde <span id="tvHasRound">1</span>: Zoek dit!
+          </div>
+          <div id="tvHasObject"
+            style="font-family:'Fredoka One'; font-size:72px; background:linear-gradient(135deg, #a78bfa, var(--neon-green)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; margin-bottom:10px;">
+            —
+          </div>
+        </div>
+
+        <div id="imposterTVUI" style="display:none; text-align:center;">
+          <div id="imposterTVPhaseTitle"
+            style="font-family:'Fredoka One'; font-size:54px; color:var(--accent); margin-bottom:20px; text-shadow: 0 0 20px var(--accent-glow);">
+            🤫 Bekijk je rol!
+          </div>
+          <div id="imposterTVDesc"
+            style="font-size:28px; color:var(--text-muted); max-width:800px; margin:0 auto; line-height:1.4; font-weight:600;">
+            Houd je telefoon geheim en geef hem niet door.
+          </div>
+          <!-- Animation or icon -->
+          <div id="imposterTVIcon" style="font-size:120px; margin-top:40px; animation: float 3s ease-in-out infinite;">
+            🥸</div>
+        </div>
+
+        <div class="big-timer" id="bigTimer" style="margin-top: 0;">00:00</div>
+      </div>
+
+      <!-- TIME'S UP -->
+      <div id="viewTimesup" class="timesup-view hidden">
+        <div class="timesup-title">⏰ Tijd is om!</div>
+        <div class="timesup-sub" id="timesupSub">De Game Master verdeelt de punten.</div>
+      </div>
+
+      <!-- WINNER REVEAL -->
+      <div id="viewWinner" class="winner-view hidden">
+        <canvas id="confetti-canvas"></canvas>
+        <div class="winner-label">AND THE WINNER IS...</div>
+        <div class="winner-team-card" id="winnerTeamCard">
+          <div class="winner-icon" id="winnerIcon">🏆</div>
+          <div class="winner-name" id="winnerName">TEAM NAAM</div>
+          <div class="winner-score" id="winnerScore">0 PUNTEN</div>
+        </div>
+        <div class="winner-players" id="winnerPlayers"></div>
+      </div>
+
+      <!-- TIME GUESSER VIEW -->
+      <div id="viewTimeGuesser" class="story-view hidden">
+        <div id="tgTvExplanation">
+          <div class="story-title" style="font-size: 80px;">⏱️ 20 Sec Challenge</div>
+          <div class="story-text" style="font-size: 32px; line-height: 1.4; margin-top: 20px;">
+            Druk op de knop op je telefoon als je denkt dat er precies <b>20 seconden</b> voorbij zijn!<br><br>
+            De eerste 5 seconden zie je de timer nog... daarna wordt het <b>donker</b>! 🤫
+          </div>
+          <div style="font-size: 120px; margin-top: 40px;">⏱️</div>
+        </div>
+
+        <div id="tgTvCountdown" style="font-size: 200px; font-family: 'Fredoka One'; color: var(--accent);" class="hidden">3</div>
+        
+        <div id="tgTvActive" class="hidden" style="position: relative; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+           <div class="story-title" style="font-size: 80px;">⏳ Tellen maar...</div>
+           
+           <div style="position: relative; margin-top: 40px;">
+             <div id="tgTvTimer" style="font-size: 180px; font-family: 'Fredoka One'; color: var(--neon-yellow); text-shadow: 0 0 40px rgba(250, 204, 21, 0.4); padding: 20px 60px;">0.0s</div>
+             <div class="poop-drip-container">
+               <div id="tgDrip" class="poop-drip"></div>
+             </div>
+           </div>
+
+           <div style="font-size: 32px; color: var(--text-muted); margin-top: 20px;">Niet spieken op het scherm!</div>
+           
+           <div id="tgBird" class="bird-anim">🐦</div>
+        </div>
+
+        <div id="tgTvResults" class="hidden" style="width: 1000px;">
+           <div class="story-title" style="font-size: 56px; margin-bottom: 40px;">📊 De Resultaten</div>
+           <div id="tgTvResultList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; width: 100%;"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+  <div style="display:none;">
+    <button id="btnStartGame"></button>
+    <button id="btnNextPage"></button>
+    <button id="tvLockBtn"></button>
+    <span id="wolvesScore"></span>
+    <span id="chickensScore"></span>
+    <span id="wolvesScoreDisplay"></span>
+    <span id="chickensScoreDisplay"></span>
+    <div id="adminModal"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="script.js"></script>
+
+  <script>
+    // Check if user is logged in
+    if (!isUserLoggedIn()) {
+      window.location.href = "index.html";
+    }
+
+
+  </script>
+
+  <script>
+    const MINIGAMES = [
+      { id: "HideAndSeek", icon: "🔍", name: "Hide and Seek", duration: 60, description: "De app kiest een voorwerp. Wie het als eerste vindt en bij de GM brengt, wint de ronde! (5 rondes)" },
+      { id: "Imposter", icon: "🥸", name: "The Imposter", duration: 3600, description: "Eén persoon is de Imposter en weet het woord niet. Vind de bedrieger voordat het te laat is!" },
+      { id: "TimeGuesser", icon: "⏱️", name: "20 Sec Challenge", duration: 40, description: "Druk precies na 20 seconden op de knop! (Marge: 17.5s - 22.5s)" }
+    ];
+
+    let tvWheelRotation = 0;
+    let tvIsSpinning = false;
+    let tvAvailableGames = [];
+
+    let currentState = null;
+    let allPlayers = [];
+    let timerInterval = null;
+    let selectedMgId = "";
+    let minigameActive = false;
+    let tgTimerInterval = null;
+
+    function startTgTimer(startTime) {
+      if (tgTimerInterval) return; // Already running
+      const timerEl = document.getElementById("tgTvTimer");
+      const bird = document.getElementById("tgBird");
+      const drip = document.getElementById("tgDrip");
+      
+      // Reset
+      timerEl.style.visibility = "visible";
+      bird.className = "bird-anim active";
+      bird.style.left = "auto"; bird.style.top = "auto"; // Reset styles if any
+      drip.classList.remove("active");
+
+      tgTimerInterval = setInterval(() => {
+        const now = Date.now();
+        const elapsed = (now - startTime) / 1000;
+        
+        if (elapsed < 5) {
+          timerEl.textContent = elapsed.toFixed(1) + "s";
+        } else {
+          // Poop moment
+          if (!drip.classList.contains("active")) {
+            // Move bird to timer position (approx center)
+            bird.style.transition = "all 0.5s ease-out";
+            bird.style.left = "50%";
+            bird.style.top = "50%";
+            bird.style.transform = "translate(-50%, -150%)";
+            
+            setTimeout(() => {
+              drip.classList.add("active");
+              // Wait a bit then bird flies away
+              setTimeout(() => {
+                bird.className = "bird-anim exit";
+              }, 1000);
+            }, 300);
+          }
+        }
+        
+        if (elapsed >= 35) {
+          clearInterval(tgTimerInterval);
+          tgTimerInterval = null;
+        }
+      }, 100);
+    }
+
+    function startBigTimer(timerEnd) {
+      if (timerInterval) clearInterval(timerInterval);
+      const timerEl = document.getElementById("bigTimer");
+      if (!timerEl) return;
+      
+      function tick() {
+        if (!timerEnd) return;
+        const now = Date.now();
+        const rem = Math.max(0, Math.round((timerEnd - now) / 1000));
+        const m = Math.floor(rem / 60);
+        const s = rem % 60;
+        timerEl.textContent = `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+        
+        if (rem <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+        }
+      }
+      
+      tick();
+      timerInterval = setInterval(tick, 1000);
+    }
+
+    // ── VIEWS ─────────────────────────────────────────────────
+    function showView(id) {
+      const views = ["viewStory", "viewReady", "viewBetween", "viewActive", "viewTimesup", "viewWinner", "viewTimeGuesser"];
+      views.forEach(v => {
+        const el = document.getElementById(v);
+        if (el) el.classList.toggle("hidden", v !== id);
+      });
+      if (id !== "viewActive") {
+        minigameActive = false;
+        clearInterval(timerInterval);
+      }
+      if (id !== "viewWinner") {
+        stopConfetti();
+      }
+    }
+
+    // ── RENDER TEAM COLUMNS ────────────────────────────────────
+    function renderTeamColumns(players) {
+      // playerCount removed from HTML, so we skip updating it
+
+
+      // Filter spelers op team - zorg dat alle spelers met team "wolves" of "chickens" worden meegenomen
+      const wolves = players.filter(p => p.team === "wolves");
+      const chickens = players.filter(p => p.team === "chickens");
+
+      function buildList(elId, list) {
+        const el = document.getElementById(elId);
+        if (list.length === 0) {
+          el.innerHTML = '<div class="team-no-members">Nog niemand...</div>';
+          return;
+        }
+        el.innerHTML = "";
+        list.forEach(p => {
+          const row = document.createElement("div");
+          row.className = "team-member-row";
+          row.innerHTML = `<span class="team-member-icon">${p.icon}</span><span>${p.name}</span>`;
+          el.appendChild(row);
+        });
+      }
+
+      buildList("wolvesMembers", wolves);
+      buildList("chickensMembers", chickens);
+    }
+
+    // ── RENDER READY GRID ──────────────────────────────────────
+    function renderReadyGrid(players) {
+      const grid = document.getElementById("readyGrid");
+      grid.innerHTML = "";
+      if (players.length === 0) {
+        grid.innerHTML = '<p style="color:var(--text-muted);font-size:16px;grid-column:1/-1;">Geen spelers...</p>';
+        return;
+      }
+      players.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "ready-row";
+        row.innerHTML = `
+          <span class="ready-player-icon">${p.icon}</span>
+          <span class="ready-player-name">${p.name}</span>
+          ${p.ready ? '<span class="ready-yes">✅ Klaar!</span>' : '<span class="ready-no">⏳ Niet klaar</span>'}`;
+        grid.appendChild(row);
+      });
+    }
+
+    function renderTvTimeResults() {
+      const listEl = document.getElementById("tgTvResultList");
+      if (!listEl) return;
+      listEl.innerHTML = "";
+      
+      const sorted = [...allPlayers].sort((a,b) => {
+        if (!a.timeResult) return 1;
+        if (!b.timeResult) return -1;
+        return a.timeResult - b.timeResult;
+      });
+
+      sorted.forEach(p => {
+        if (!p.timeResult) return;
+        const row = document.createElement("div");
+        row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; background: rgba(255,255,255,0.08); border-radius: 16px; font-size: 28px; border: 1px solid rgba(255,255,255,0.1);";
+        
+        const isWinner = p.timeScore > 0;
+        row.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <span style="font-size: 40px;">${p.icon}</span>
+            <span style="font-weight: 700; color: #fff;">${p.name}</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 25px;">
+            <span style="font-family: 'Fredoka One'; color: ${isWinner ? 'var(--neon-green)' : 'var(--text-muted)'}">${p.timeResult.toFixed(2)}s</span>
+            <span style="font-size: 32px;">${isWinner ? '✅ +1' : '❌'}</span>
+          </div>
+        `;
+        listEl.appendChild(row);
+      });
+    }
+
+    // ── UPDATE TV STATE ────────────────────────────────────────
+    let betweenTimer = null;
+
+    function updateTvState(state) {
+      currentState = state;
+      if (!state) return;
+
+      clearInterval(timerInterval);
+
+      // Show/hide top bar and teams based on game status
+      const topBar = document.querySelector('.tv-topbar');
+      const teamsPanel = document.getElementById('teamsPanel');
+
+      // Home screen is either lobby OR playing-ready-page3 (post-game)
+      const isLobby = state.status === 'lobby';
+      const isPostGameHome = state.status === 'playing' && state.gamePhase === 'ready' && !state.activeGameId;
+
+      if (isLobby || isPostGameHome) {
+        topBar.style.display = 'flex';
+        teamsPanel.style.display = 'grid';
+      } else {
+        topBar.style.display = 'none';
+        teamsPanel.style.display = 'none';
+      }
+
+      // Update room code
+      const roomCodeEl = document.getElementById('tvRoomCode');
+      if (roomCodeEl && state.roomCode) {
+        roomCodeEl.textContent = state.roomCode;
+      } else if (roomCodeEl) {
+        roomCodeEl.textContent = '----';
+      }
+
+      if (state.showBetween) {
+        const ts = state.teamScores || { wolves: 0, chickens: 0 };
+        document.getElementById("betweenTitle").textContent = "🥁 Tussenstand";
+        document.getElementById("betweenText").textContent = `🐺 Wolven ${ts.wolves || 0} – 🐔 Kippen ${ts.chickens || 0}`;
+        document.getElementById("betweenSub").textContent = "Hier is de tussenstand op TV.";
+        showView("viewBetween");
+        clearTimeout(betweenTimer);
+        betweenTimer = setTimeout(() => {
+          updateGameState({ showBetween: false });
+        }, 5000);
+        return;
+      }
+
+      // Pause state
+      const pauseOverlay = document.getElementById("pauseOverlay");
+      if (pauseOverlay) {
+        pauseOverlay.style.display = state.isPaused ? "flex" : "none";
+      }
+
+      const lockBtn = document.getElementById("tvLockBtn");
+      if (lockBtn) {
+        lockBtn.textContent = state.isLocked ? "🔓 Unlock" : "🔒 Lock";
+      }
+
+      const statusEl = document.getElementById("tvGameStatus");
+      if (statusEl) {
+        statusEl.textContent = state.status === "playing" ? "Playing" : "Lobby";
+      }
+
+      // Team scores
+      const ts = state.teamScores || { wolves: 0, chickens: 0 };
+      document.getElementById("wolvesScore").textContent = ts.wolves || 0;
+      document.getElementById("chickensScore").textContent = ts.chickens || 0;
+      document.getElementById("wolvesScoreDisplay").textContent = ts.wolves || 0;
+      document.getElementById("chickensScoreDisplay").textContent = ts.chickens || 0;
+      document.getElementById("wolvesScoreDisplayNext").textContent = ts.wolves || 0;
+      document.getElementById("chickensScoreDisplayNext").textContent = ts.chickens || 0;
+
+      // ── LOBBY
+      if (state.status === "lobby") {
+        showView(null);
+        // teamsPanel display handled above
+        document.getElementById("btnStartGame").style.display = "block";
+        document.getElementById("btnNextPage").style.display = "none";
+        minigameActive = false;
+        return;
+      }
+
+      // ── PLAYING
+      // teamsPanel display handled above
+      document.getElementById("btnStartGame").style.display = "none";
+
+      if (state.gamePhase === "winner_reveal") {
+        showView("viewWinner");
+        const winnerTeam = state.winnerTeam || "draw";
+        const ts = state.teamScores || { wolves: 0, chickens: 0 };
+        const nameEl = document.getElementById("winnerName");
+        const iconEl = document.getElementById("winnerIcon");
+        const scoreEl = document.getElementById("winnerScore");
+        const cardEl = document.getElementById("winnerTeamCard");
+        const playersEl = document.getElementById("winnerPlayers");
+
+        if (winnerTeam === "draw") {
+          nameEl.textContent = "Gelijkspel!";
+          iconEl.textContent = "🤝";
+          scoreEl.textContent = `${ts.wolves} - ${ts.chickens}`;
+          cardEl.style.borderColor = "var(--text-muted)";
+        } else {
+          const isWolves = winnerTeam === "wolves";
+          nameEl.textContent = isWolves ? "De Wolven" : "De Kippen";
+          nameEl.style.background = isWolves ? "linear-gradient(135deg, #fff, #a78bfa)" : "linear-gradient(135deg, #fff, #fbbf24)";
+          nameEl.style.webkitBackgroundClip = "text";
+          nameEl.style.backgroundClip = "text";
+          iconEl.textContent = isWolves ? "🐺" : "🐔";
+          scoreEl.textContent = `${isWolves ? ts.wolves : ts.chickens} PUNTEN`;
+          cardEl.style.borderColor = isWolves ? "#a78bfa" : "#fbbf24";
+          cardEl.style.boxShadow = isWolves ? "0 0 100px rgba(167, 139, 250, 0.4)" : "0 0 100px rgba(251, 191, 36, 0.4)";
+        }
+
+        // Render winning players
+        playersEl.innerHTML = "";
+        const winners = allPlayers.filter(p => p.team === winnerTeam || winnerTeam === "draw");
+        winners.forEach((p, idx) => {
+          const chip = document.createElement("div");
+          chip.className = "winner-player-chip";
+          chip.style.animationDelay = `${1.5 + (idx * 0.1)}s`;
+          chip.innerHTML = `<span>${p.icon}</span><span>${p.name}</span>`;
+          playersEl.appendChild(chip);
+        });
+
+        startConfetti();
+        return;
+      }
+
+      if (state.activeGameId === "TimeGuesser") {
+        showView("viewTimeGuesser");
+        const exp = document.getElementById("tgTvExplanation");
+        const cd = document.getElementById("tgTvCountdown");
+        const act = document.getElementById("tgTvActive");
+        const res = document.getElementById("tgTvResults");
+
+        if (state.gamePhase === "explanation") {
+          exp.classList.remove("hidden"); cd.classList.add("hidden"); act.classList.add("hidden"); res.classList.add("hidden");
+        } else if (state.gamePhase === "countdown") {
+          exp.classList.add("hidden"); cd.classList.remove("hidden"); act.classList.add("hidden"); res.classList.add("hidden");
+          cd.textContent = state.countdownValue || "3";
+          clearInterval(tgTimerInterval);
+        } else if (state.gamePhase === "active") {
+          exp.classList.add("hidden"); cd.classList.add("hidden"); act.classList.remove("hidden"); res.classList.add("hidden");
+          if (state.gameStartTime) startTgTimer(state.gameStartTime);
+        } else if (state.gamePhase === "ended") {
+          exp.classList.add("hidden"); cd.classList.add("hidden"); act.classList.add("hidden"); res.classList.remove("hidden");
+          clearInterval(tgTimerInterval);
+          renderTvTimeResults();
+        }
+        return;
+      }
+
+      if ((state.gamePhase === "ended" && (state.activeGameId !== "Imposter" || state.minigameState?.status === "ended")) || (state.activeGameId === "HideAndSeek" && state.minigameState?.status === "round_ended")) {
+        showView("viewTimesup");
+        document.getElementById("timesupSub").textContent = state.gamePhase === "ended" ? "De Game Master verdeelt de punten." : "Tijd is om! Op naar de volgende ronde?";
+        document.getElementById("btnNextPage").style.display = "none";
+        minigameActive = false;
+        return;
+      }
+
+      if (state.gamePhase === "active") {
+        const isImposter = state.activeGameId === "Imposter";
+
+        if (state.timerEnd || isImposter) {
+          showView("viewActive");
+
+          const isHAS = state.activeGameId === "HideAndSeek";
+
+          document.getElementById("standardActiveUI").style.display = (isHAS || isImposter) ? "none" : "block";
+          document.getElementById("hideAndSeekTVUI").style.display = isHAS ? "block" : "none";
+          document.getElementById("imposterTVUI").style.display = isImposter ? "block" : "none";
+
+          const timerEl = document.getElementById("bigTimer");
+          if (isHAS) {
+            const ms = state.minigameState || {};
+            document.getElementById("tvHasRound").textContent = ms.round || 1;
+            document.getElementById("tvHasObject").textContent = ms.targetObject || "Zoeken...";
+            timerEl.style.display = "block";
+            startBigTimer(state.timerEnd);
+          } else if (isImposter) {
+            const ms = state.minigameState || {};
+            const phase = ms.status || "reveal";
+            const titleEl = document.getElementById("imposterTVPhaseTitle");
+            const descEl = document.getElementById("imposterTVDesc");
+            const iconEl = document.getElementById("imposterTVIcon");
+
+            if (phase === "reveal") {
+              titleEl.textContent = "🤫 ROL REVEAL";
+              titleEl.style.color = "var(--neon-pink)";
+              descEl.textContent = "Houd je telefoon GEHEIM! Laat niemand je woord of rol zien.";
+              iconEl.textContent = "🤫";
+            } else if (phase === "discussion") {
+              titleEl.textContent = "💬 DISCUSSIE TIJD!";
+              titleEl.style.color = "var(--accent)";
+              descEl.textContent = "Praat met elkaar. Wie gedraagt zich verdacht?";
+              iconEl.textContent = "🧐";
+            } else if (phase === "voting") {
+              titleEl.textContent = "🗳️ STEMMEN MAAR!";
+              titleEl.style.color = "var(--neon-green)";
+              descEl.textContent = "Breng nu je stem uit op je telefoon. Ontmasker de Imposter!";
+              iconEl.textContent = "👉";
+            }
+            timerEl.style.display = "none";
+            if (state.timerEnd) startBigTimer(state.timerEnd);
+          } else {
+            document.getElementById("activeGameName").textContent = state.activeGameName || "Minigame";
+            document.getElementById("activeGameDesc").textContent = state.message || "";
+            timerEl.style.display = "block";
+            if (state.timerEnd) startBigTimer(state.timerEnd);
+          }
+
+          document.getElementById("btnNextPage").style.display = "none";
+          minigameActive = true;
+          return;
+        }
+      }
+
+      if (state.gamePhase === "explanation") {
+        showView("viewReady");
+        const mg = MINIGAMES.find(m => m.id === state.activeGameId);
+        const titleText = document.getElementById("readyTitleText");
+        if (titleText) titleText.textContent = "📋 Speluitleg";
+        document.getElementById("readyMgName").textContent = state.activeGameName || (mg ? mg.name : "");
+        document.getElementById("readyMgDesc").textContent = mg ? mg.description : (state.message || "");
+        renderReadyGrid(allPlayers);
+        return;
+      }
+
+      if ((state.gamePhase === "ready" || state.page === 4) && state.activeGameId) {
+        showView("viewReady");
+        const mg = MINIGAMES.find(m => m.id === state.activeGameId);
+        const titleText = document.getElementById("readyTitleText");
+        if (titleText) titleText.textContent = "⚡ Ben je klaar?";
+        document.getElementById("readyMgName").textContent = state.activeGameName || (mg ? mg.name : "");
+        document.getElementById("readyMgDesc").textContent = mg ? mg.description : (state.message || "");
+        renderReadyGrid(allPlayers);
+        return;
+      }
+
+      // ── STORY PAGES 1-4
+      if (state.page >= 1 && state.page <= 4 && state.gamePhase === "story") {
+        showView("viewStory");
+        const titleEl = document.getElementById("storyTitle");
+        const textEl = document.getElementById("storyText");
+        const iconEl = document.getElementById("storyIcon");
+        const smallRuleEl = document.getElementById("storySmallRule");
+        const extraArea = document.getElementById("storyExtraArea");
+
+        // Clear previous
+        iconEl.className = "";
+        smallRuleEl.style.display = "none";
+        extraArea.style.display = "none";
+
+        if (state.page === 1) {
+          titleEl.textContent = "Maak je klaar...";
+          textEl.textContent = "Jullie krijgen straks grappige challenges, geheime opdrachten en snelle minigames op jullie telefoon. Werk samen met je team, wees sneller dan de rest en verzamel zoveel mogelijk punten!";
+          iconEl.textContent = "⚡";
+          iconEl.className = "pulse-icon";
+          smallRuleEl.textContent = "📱 Zorg dat iedereen verbonden is met de kamer.";
+          smallRuleEl.style.display = "block";
+        } else if (state.page === 2) {
+          titleEl.textContent = "Welkom bij The Wonder Games!";
+          textEl.textContent = "Gebruik je telefoon om mee te spelen. Kies een team, volg de opdrachten op je scherm en luister naar de Game Master.";
+          iconEl.textContent = "🎮";
+          iconEl.className = "float-icon";
+          extraArea.innerHTML = `
+            <div class="story-extra-item"><span>🎮</span> <span>Elke speler speelt <b>live</b> mee</span></div>
+            <div class="story-extra-item"><span>⚡</span> <span><b>Reactiesnelheid</b> = voordeel</span></div>
+            <div class="story-extra-item"><span>🤫</span> <span>Sommige games bevatten <b>geheime rollen</b></span></div>
+          `;
+          extraArea.style.display = "flex";
+        } else if (state.page === 3) {
+          titleEl.textContent = "Spelregels";
+          textEl.textContent = "Elk spel bestaat uit meerdere rondes. Voer opdrachten sneller of slimmer uit dan het andere team om punten te verdienen.";
+          iconEl.textContent = "📜";
+          extraArea.innerHTML = `
+            <div class="story-extra-item"><span>🐺</span> <span>Team Wolven vs <b>Team Kippen</b> 🐔</span></div>
+            <div class="story-extra-item"><span>⏱️</span> <span>Sommige games hebben een <b>timer</b></span></div>
+            <div class="story-extra-item"><span>🏆</span> <span>Het team met de <b>meeste punten</b> wint</span></div>
+            <div class="story-extra-item"><span>🚫</span> <span><b>Niet spieken</b> op andere telefoons 😉</span></div>
+          `;
+          extraArea.style.display = "flex";
+        } else if (state.page === 4) {
+          titleEl.textContent = "Belangrijk!";
+          textEl.textContent = "Blijf dicht bij de TV en houd je telefoon bij de hand. Sommige opdrachten moeten snel uitgevoerd worden in het echte leven!";
+          iconEl.textContent = "⚠️";
+          iconEl.className = "bounce-icon";
+        }
+        return;
+      }
+
+      // Home Screen / Clean Lobby (Playing but no active game)
+      showView(null);
+    }
+
+    // ── TIMER ─────────────────────────────────────────────────
+    function renderTvTimeResults() {
+      const listEl = document.getElementById("tgTvResultList");
+      listEl.innerHTML = "";
+      const sorted = [...allPlayers].sort((a,b) => {
+        if (!a.timeResult) return 1;
+        if (!b.timeResult) return -1;
+        return a.timeResult - b.timeResult;
+      });
+      sorted.forEach(p => {
+        if (!p.timeResult) return;
+        const card = document.createElement("div");
+        card.style.cssText = "background: var(--bg-card); border: 2px solid var(--border); border-radius: 20px; padding: 25px; display: flex; justify-content: space-between; align-items: center;";
+        const isWin = p.timeScore > 0;
+        card.innerHTML = `
+          <div style="display: flex; align-items: center; gap: 20px;">
+            <div style="font-size: 60px;">${p.icon}</div>
+            <div style="font-size: 32px; font-weight: 800;">${p.name}</div>
+          </div>
+          <div style="text-align: right;">
+            <div style="font-family: 'Fredoka One'; font-size: 48px; color: ${isWin ? 'var(--neon-green)' : 'var(--text-muted)'}">${p.timeResult.toFixed(2)}s</div>
+            <div style="font-size: 24px; font-weight: 800;">${isWin ? '✅ +1 PUNT' : '❌ GEEN PUNT'}</div>
+          </div>
+        `;
+        listEl.appendChild(card);
+      });
+    }
+
+    // ── GAME CONTROLS ──────────────────────────────────────────
+    async function tvStartGame() {
+      const wolves = allPlayers.filter(p => p.team === "wolves");
+      const chickens = allPlayers.filter(p => p.team === "chickens");
+      if (wolves.length === 0 || chickens.length === 0) {
+        alert("Elk team moet minimaal 1 speler hebben!\nWijs spelers toe via 🛠️ Teams & Spelers.");
+        return;
+      }
+      await updateGameState({
+        status: "playing", isLocked: true, page: 1,
+        message: "Welkom bij The Wonder Games! Bereid je voor op een geweldige avond.",
+        gamePhase: "story",
+        activeGameId: "", activeGameName: "", activeGameDescription: "",
+        activeGameDuration: null, timerEnd: null
+      });
+    }
+
+    async function tvNextPage() {
+      if (!currentState) return;
+      const next = (currentState.page || 1) + 1;
+      if (next > 4) return;
+      const msgs = {
+        2: "Zometeen krijgen jullie een opdracht. Het team dat de opdracht het beste uitvoert krijgt een punt!",
+        3: "Jullie kunnen spelletjes op de telefoon krijgen... of een opdracht in het echte leven!",
+        4: "Zijn jullie er klaar voor?"
+      };
+      await updateGameState({
+        page: next,
+        message: msgs[next] || "",
+        gamePhase: next === 4 ? "ready" : "story"
+      });
+    }
+
+    async function tvToggleLock() {
+      if (!currentState) return;
+      await setLocked(!currentState.isLocked);
+    }
+
+    async function tvResetGame() {
+      if (!confirm("Weet je zeker? Alle spelers en scores worden gewist.")) return;
+      clearInterval(timerInterval);
+      minigameActive = false;
+      selectedMgId = "";
+      await clearAllPlayers();
+      await updateGameState({
+        status: "lobby", isLocked: false, page: 1, message: "", gamePhase: "lobby",
+        activeGameId: "", activeGameName: "", activeGameDescription: "",
+        activeGameDuration: null, timerEnd: null,
+        teamScores: { wolves: 0, chickens: 0 },
+        playedGames: [], lastPlayedGameId: ""
+      });
+    }
+
+    function showNextMinigamePicker() {
+      minigameActive = false;
+      selectedMgId = "";
+      openAdminModal();
+    }
+
+    // ── TEAM SCORES ────────────────────────────────────────────
+    async function adjustTeamScore(team, delta) {
+      const ts = (currentState && currentState.teamScores) || { wolves: 0, chickens: 0 };
+      const updated = { wolves: ts.wolves || 0, chickens: ts.chickens || 0 };
+      updated[team] = Math.max(0, updated[team] + delta);
+      await updateGameState({ teamScores: updated });
+    }
+
+    // ── ADMIN MODAL ────────────────────────────────────────────
+    function openAdminModal() {
+      renderPlayerAssign();
+      renderAdminMinigames();
+      document.getElementById("adminModal").classList.add("show");
+    }
+    function closeAdminModal() {
+      document.getElementById("adminModal").classList.remove("show");
+    }
+
+    function renderPlayerAssign() {
+      const el = document.getElementById("playerAssignList");
+      if (allPlayers.length === 0) {
+        el.innerHTML = '<p style="color:var(--text-muted);font-size:13px;">Nog geen spelers...</p>';
+        return;
+      }
+      el.innerHTML = "";
+      allPlayers.forEach(p => {
+        const row = document.createElement("div");
+        row.className = "player-assign-row";
+        const wA = p.team === "wolves" ? "active" : "";
+        const cA = p.team === "chickens" ? "active" : "";
+        row.innerHTML = `
+          <span style="font-size:22px;">${p.icon}</span>
+          <span class="player-assign-name">${p.name}</span>
+          <button class="team-btn wolves ${wA}"   onclick="assignTeam('${p.name}','wolves',this)">🐺 Wolven</button>
+          <button class="team-btn chickens ${cA}" onclick="assignTeam('${p.name}','chickens',this)">🐔 Kippen</button>`;
+        el.appendChild(row);
+      });
+    }
+
+    async function assignTeam(playerName, team, btn) {
+      try {
+        await db.collection("players").doc(playerDocId(playerName)).update({
+          team: team,
+          LastAction: new Date().toISOString()
+        });
+        const row = btn.closest(".player-assign-row");
+        row.querySelectorAll(".team-btn").forEach(b => b.classList.remove("active"));
+        btn.classList.add("active");
+      } catch (e) { console.error("assignTeam error:", e); }
+    }
+
+    function renderAdminMinigames() {
+      const list = document.getElementById("adminMinigameList");
+      list.innerHTML = "";
+      const btn = document.getElementById("adminLaunchBtn");
+
+      if (minigameActive) {
+        list.innerHTML = `<p style="color:var(--text-muted);font-size:13px;font-weight:600;">
+          ⏳ Een minigame is bezig. Klik op "Volgende Minigame Kiezen" als de tijd om is.</p>`;
+        btn.disabled = true;
+        btn.textContent = "🚀 Start Minigame";
+        btn.onclick = adminLaunchMinigame;
+        return;
+      }
+
+      MINIGAMES.forEach(mg => {
+        const card = document.createElement("div");
+        card.className = "minigame-card";
+        card.id = `admg-${mg.id}`;
+        card.onclick = () => pickAdminMg(mg.id);
+        card.innerHTML = `
+          <div class="mg-icon">${mg.icon}</div>
+          <div class="mg-info">
+            <h4>${mg.name} <span style="color:var(--text-muted);font-size:11px;font-weight:600;">${mg.duration}s</span></h4>
+            <p>${mg.description}</p>
+          </div>`;
+        list.appendChild(card);
+        if (mg.id === selectedMgId) card.classList.add("selected");
+      });
+
+      btn.disabled = !selectedMgId;
+      btn.textContent = "🚀 Start Minigame";
+      btn.className = "success";
+      btn.onclick = adminLaunchMinigame;
+    }
+
+    function pickAdminMg(id) {
+      selectedMgId = id;
+      document.querySelectorAll(".minigame-card").forEach(c => c.classList.remove("selected"));
+      const card = document.getElementById(`admg-${id}`);
+      if (card) card.classList.add("selected");
+      document.getElementById("adminLaunchBtn").disabled = false;
+    }
+
+    async function adminLaunchMinigame() {
+      if (!selectedMgId || minigameActive) return;
+      const mg = MINIGAMES.find(m => m.id === selectedMgId);
+      if (!mg) return;
+
+      // Reset all ready flags
+      const snap = await db.collection("players").get();
+      const batch = db.batch();
+      snap.forEach(doc => batch.update(doc.ref, { ready: false }));
+      await batch.commit();
+
+      // Go to ready check
+      await updateGameState({
+        status: "playing", isLocked: true, page: 3,
+        gamePhase: "explanation",
+        activeGameId: mg.id, activeGameName: mg.name,
+        activeGameDescription: mg.description,
+        activeGameDuration: mg.duration,
+        message: mg.description,
+        timerEnd: null
+      });
+
+      // Change button to "Start Timer"
+      const btn = document.getElementById("adminLaunchBtn");
+      btn.textContent = "⏱️ Iedereen klaar? Klik om timer te starten!";
+      btn.className = "warning";
+      btn.disabled = false;
+      btn.onclick = () => adminBeginTimer(mg);
+    }
+
+    async function adminBeginTimer(mg) {
+      // Speciale games hebben een eigen initialisatie nodig
+      if (mg.id === "HideAndSeek") {
+        const randomObj = HOUSEHOLD_OBJECTS[Math.floor(Math.random() * HOUSEHOLD_OBJECTS.length)];
+        const timerEnd = Date.now() + mg.duration * 1000;
+        await updateGameState({
+          gamePhase: "active", page: 5, message: `Ronde 1: Zoek ${randomObj}!`,
+          timerEnd: timerEnd,
+          minigameState: { type: "HideAndSeek", round: 1, targetObject: randomObj, status: "searching" }
+        });
+      } else if (mg.id === "Imposter") {
+        if (allPlayers.length < 1) { alert("Minimaal 1 speler nodig!"); return; }
+        const randomWord = IMPOSTER_WORDS[Math.floor(Math.random() * IMPOSTER_WORDS.length)];
+        const imposter = allPlayers[Math.floor(Math.random() * allPlayers.length)];
+        const timerEnd = Date.now() + (3600 * 1000);
+        await updateGameState({
+          gamePhase: "active", message: "Bekijk je rol op je telefoon!", timerEnd: timerEnd,
+          minigameState: { type: "Imposter", word: randomWord, imposterName: imposter.name, status: "reveal" }
+        });
+      } else {
+        const timerEnd = Date.now() + mg.duration * 1000;
+        await updateGameState({ gamePhase: "active", page: 5, message: mg.description, timerEnd });
+      }
+      minigameActive = true;
+      selectedMgId = "";
+      closeAdminModal();
+    }
+
+    // ── INIT ─────────────────────────────────────────────────
+    document.addEventListener("DOMContentLoaded", async () => {
+      await ensureGameState();
+
+      listenToPlayers(players => {
+        allPlayers = players;
+        renderTeamColumns(players);
+        // Forceer een UI update als de spelerslijst verandert
+        if (currentState) updateTvState(currentState);
+      });
+
+      listenToGameState(state => {
+        updateTvState(state);
+      });
+    });
+    // ── CONFETTI ───────────────────────────────────────────────
+    let confettiActive = false;
+    function startConfetti() {
+      if (confettiActive) return;
+      confettiActive = true;
+      const canvas = document.getElementById("confetti-canvas");
+      const ctx = canvas.getContext("2d");
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      let particles = [];
+      const colors = ["#a78bfa", "#fbbf24", "#f43f8e", "#22d3a5", "#fbbf24"];
+
+      for (let i = 0; i < 150; i++) {
+        particles.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * 150,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          tilt: Math.random() * 10 - 10,
+          tiltAngleIncremental: Math.random() * 0.07 + 0.05,
+          tiltAngle: 0
+        });
+      }
+
+      function draw() {
+        if (!confettiActive) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+          p.tiltAngle += p.tiltAngleIncremental;
+          p.y += (Math.cos(p.d) + 3 + p.r / 2) / 2;
+          p.tilt = Math.sin(p.tiltAngle) * 15;
+          if (p.y > canvas.height) {
+            p.x = Math.random() * canvas.width;
+            p.y = -20;
+          }
+          ctx.beginPath();
+          ctx.lineWidth = p.r;
+          ctx.strokeStyle = p.color;
+          ctx.moveTo(p.x + p.tilt + p.r / 4, p.y);
+          ctx.lineTo(p.x + p.tilt, p.y + p.tilt + p.r / 4);
+          ctx.stroke();
+        });
+        requestAnimationFrame(draw);
+      }
+      draw();
+    }
+
+    function stopConfetti() {
+      confettiActive = false;
+      const canvas = document.getElementById("confetti-canvas");
+      if (canvas) {
+        const ctx = canvas.getContext("2d");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      const canvas = document.getElementById("confetti-canvas");
+      if (canvas) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+    });
+  </script>
+</body>
+
+</html>

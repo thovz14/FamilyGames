@@ -1,0 +1,1634 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Wonder Games – Game Master</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="Wonderlight Studios logo.jpeg">
+  <style>
+    /* ── GM PANEL LAYOUT ─────────────────────────────────────── */
+    body {
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .gm-layout {
+      display: grid;
+      grid-template-rows: 56px 1fr;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Top bar */
+    .gm-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      gap: 12px;
+    }
+
+    .gm-topbar-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 20px;
+      color: #a78bfa;
+    }
+
+    .gm-topbar-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .gm-topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* ── 3-COLUMN BODY ─────────────────────────────────────── */
+    .gm-columns {
+      display: grid;
+      grid-template-columns: 300px 1fr 320px;
+      height: 100%;
+      overflow: hidden;
+    }
+
+    .gm-col {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border-right: 1px solid var(--border);
+    }
+
+    .gm-col:last-child {
+      border-right: none;
+    }
+
+    .gm-col-header {
+      padding: 14px 18px;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .gm-col-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .gm-col-body::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    .gm-col-body::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    .gm-col-body::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    /* ── LEFT COL: TEAMS ─────────────────────────────────── */
+    .team-block {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .team-block-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .team-block-header.wolves {
+      background: rgba(167, 139, 250, 0.08);
+      border-bottom-color: rgba(167, 139, 250, 0.2);
+    }
+
+    .team-block-header.chickens {
+      background: rgba(251, 191, 36, 0.08);
+      border-bottom-color: rgba(251, 191, 36, 0.2);
+    }
+
+    .team-block-name {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 18px;
+    }
+
+    .team-block-name.wolves {
+      color: #a78bfa;
+    }
+
+    .team-block-name.chickens {
+      color: #fbbf24;
+    }
+
+    .team-block-score {
+      margin-left: auto;
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .team-block-score.wolves {
+      color: #a78bfa;
+    }
+
+    .team-block-score.chickens {
+      color: #fbbf24;
+    }
+
+    .score-adj-btn {
+      width: 26px;
+      height: 26px;
+      border-radius: 8px;
+      border: none;
+      font-size: 15px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s ease;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 0;
+    }
+
+    .score-adj-btn.minus {
+      background: rgba(244, 63, 142, 0.2);
+      color: var(--neon-pink);
+    }
+
+    .score-adj-btn.plus {
+      background: rgba(34, 211, 165, 0.2);
+      color: var(--neon-green);
+    }
+
+    .score-adj-btn:hover {
+      transform: scale(1.2);
+    }
+
+    .team-members-list {
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .team-member-chip {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .team-member-chip .chip-icon {
+      font-size: 18px;
+    }
+
+    .team-no-members {
+      color: var(--text-muted);
+      font-size: 12px;
+      font-weight: 600;
+      text-align: center;
+      padding: 10px;
+      opacity: 0.6;
+    }
+
+    /* Player assignment section */
+    .assign-section {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .assign-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 13px;
+    }
+
+    .assign-row .ar-icon {
+      font-size: 18px;
+    }
+
+    .assign-row .ar-name {
+      flex: 1;
+      font-weight: 700;
+    }
+
+    .team-chip-btn {
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1.5px solid;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Nunito', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .team-chip-btn.wolves {
+      border-color: rgba(167, 139, 250, 0.4);
+      color: #a78bfa;
+      background: rgba(167, 139, 250, 0.06);
+    }
+
+    .team-chip-btn.wolves.active {
+      background: rgba(167, 139, 250, 0.25);
+      border-color: #a78bfa;
+    }
+
+    .team-chip-btn.chickens {
+      border-color: rgba(251, 191, 36, 0.4);
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.06);
+    }
+
+    .team-chip-btn.chickens.active {
+      background: rgba(251, 191, 36, 0.25);
+      border-color: #fbbf24;
+    }
+
+    .remove-chip-btn {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      border: 1px solid rgba(244, 63, 142, 0.3);
+      background: rgba(244, 63, 142, 0.12);
+      color: var(--neon-pink);
+      font-size: 12px;
+      font-weight: 900;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+      text-transform: none;
+      letter-spacing: 0;
+      padding: 0;
+    }
+
+    .remove-chip-btn:hover {
+      background: rgba(244, 63, 142, 0.3);
+      transform: scale(1.1);
+    }
+
+    /* ── MIDDLE COL: GAME CONTROLS ─────────────────────── */
+    .game-status-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--neon-green);
+      box-shadow: 0 0 8px var(--neon-green);
+      animation: pulse 2s ease infinite;
+      flex-shrink: 0;
+    }
+
+    .status-dot.inactive {
+      background: var(--text-muted);
+      box-shadow: none;
+      animation: none;
+    }
+
+    .status-info {
+      flex: 1;
+    }
+
+    .status-info .si-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .status-info .si-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text);
+      margin-top: 2px;
+    }
+
+    .gm-btn-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .gm-btn-group button {
+      border-radius: var(--radius);
+      font-size: 14px;
+      padding: 12px 18px;
+    }
+
+    .gm-btn-group button.full {
+      width: 100%;
+    }
+
+    /* Room code display */
+    .room-code-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+    }
+
+    .room-code-label {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .room-code-val {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 32px;
+      color: #a78bfa;
+      letter-spacing: 0.15em;
+      line-height: 1;
+    }
+
+    .room-code-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .room-code-actions button {
+      font-size: 12px;
+      padding: 8px 14px;
+      border-radius: 10px;
+    }
+
+    /* Lock toggle */
+    .lock-toggle-btn {
+      width: 100%;
+      padding: 11px 16px;
+      border-radius: var(--radius);
+      font-size: 13px;
+      font-weight: 800;
+      font-family: 'Nunito', sans-serif;
+      cursor: pointer;
+      border: 1.5px solid;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .lock-toggle-btn.locked {
+      background: rgba(244, 63, 142, 0.1);
+      border-color: rgba(244, 63, 142, 0.4);
+      color: var(--neon-pink);
+    }
+
+    .lock-toggle-btn.unlocked {
+      background: rgba(34, 211, 165, 0.1);
+      border-color: rgba(34, 211, 165, 0.4);
+      color: var(--neon-green);
+    }
+
+    .lock-toggle-btn:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Active minigame status */
+    .active-mg-card {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(34, 211, 165, 0.06));
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius);
+      padding: 16px;
+      display: none;
+    }
+
+    .active-mg-card.show {
+      display: block;
+    }
+
+    .active-mg-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 18px;
+      color: #a78bfa;
+      margin-bottom: 4px;
+    }
+
+    .active-mg-timer {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 48px;
+      background: linear-gradient(135deg, var(--neon-yellow), var(--neon-pink));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1;
+      margin: 4px 0;
+    }
+
+    /* ── RIGHT COL: MINIGAMES ─────────────────────────── */
+    .mg-card {
+      background: var(--bg-card);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      position: relative;
+    }
+
+    .mg-card:hover {
+      border-color: rgba(124, 58, 237, 0.5);
+      background: rgba(124, 58, 237, 0.06);
+    }
+
+    .mg-card.selected {
+      border-color: var(--neon-green);
+      background: rgba(34, 211, 165, 0.07);
+      box-shadow: 0 0 16px rgba(34, 211, 165, 0.12);
+    }
+
+    .mg-card.running {
+      border-color: rgba(250, 204, 21, 0.5);
+      background: rgba(250, 204, 21, 0.05);
+      cursor: default;
+    }
+
+    .mg-card-icon {
+      font-size: 30px;
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .mg-card-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .mg-card-info h4 {
+      font-size: 15px;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .mg-card-info p {
+      font-size: 12px;
+      color: var(--text-muted);
+      font-weight: 600;
+      line-height: 1.4;
+    }
+
+    .mg-duration-badge {
+      font-size: 11px;
+      font-weight: 800;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 7px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .mg-launch-area {
+      padding: 0 0 4px;
+    }
+
+    /* Topbar badges */
+    .tb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+    }
+
+    .tb-badge.wolves {
+      border-color: rgba(167, 139, 250, 0.4);
+      color: #a78bfa;
+      background: rgba(167, 139, 250, 0.08);
+    }
+
+    .tb-badge.chickens {
+      border-color: rgba(251, 191, 36, 0.4);
+      color: #fbbf24;
+      background: rgba(251, 191, 36, 0.08);
+    }
+
+    .tb-badge .badge-score {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 16px;
+    }
+
+    /* Divider label */
+    .section-divider {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--text-muted);
+      padding: 4px 0 2px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ── GM LOGIN MODAL ──────────────────────── -->
+  <div id="gmModal" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-title">✏️ Game Master Login</div>
+      <div class="form-group">
+        <label for="gmNameInput">Naam</label>
+        <input type="text" id="gmNameInput" placeholder="Jouw naam" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label for="gmPassInput">Wachtwoord</label>
+        <input type="password" id="gmPassInput" placeholder="••••••••" autocomplete="off"
+          onkeydown="if(event.key==='Enter') submitGmLogin()">
+      </div>
+      <div id="gmLoginErr" class="message error hidden">❌ Naam of wachtwoord klopt niet.</div>
+      <div class="modal-footer">
+        <button class="secondary" onclick="window.location.href='play.html'">Annuleer</button>
+        <button class="primary" onclick="submitGmLogin()">Inloggen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="gm-layout">
+
+    <!-- ── TOP BAR ─────────────────────────────────────────────── -->
+    <div class="gm-topbar">
+      <div class="gm-topbar-left">🎛️ Game Master Panel</div>
+      <div class="gm-topbar-center">
+        <div class="tb-badge wolves">🐺 <span class="badge-score" id="topWolvesScore">0</span></div>
+        <div style="font-family:'Fredoka One',sans-serif;color:var(--text-muted);opacity:0.4;font-size:16px;">VS</div>
+        <div class="tb-badge chickens">🐔 <span class="badge-score" id="topChickensScore">0</span></div>
+      </div>
+      <div class="gm-topbar-right">
+        <div class="tb-badge" id="topStatusBadge">🔴 Lobby</div>
+        <button class="secondary" style="font-size:12px;padding:6px 14px;border-radius:10px;" onclick="logoutGm()">🚪
+          Uitloggen</button>
+      </div>
+    </div>
+
+    <!-- ── 3 COLUMNS ───────────────────────────────────────────── -->
+    <div class="gm-columns">
+
+      <!-- ══ LEFT: TEAMS ════════════════════════════════════════ -->
+      <div class="gm-col">
+        <div class="gm-col-header">👥 Teams & Spelers</div>
+        <div class="gm-col-body">
+          <div class="team-block">
+            <div class="team-block-header wolves">
+              <span style="font-size:22px;">🐺</span>
+              <span class="team-block-name wolves">De Wolven</span>
+              <button class="score-adj-btn minus" onclick="adjustTeamScore('wolves',-1)">−</button>
+              <span class="team-block-score wolves" id="wolvesScoreBig">0</span>
+              <button class="score-adj-btn plus" onclick="adjustTeamScore('wolves',+1)">+</button>
+            </div>
+            <div class="team-members-list" id="wolvesChips">
+              <div class="team-no-members">Nog niemand...</div>
+            </div>
+          </div>
+          <div class="team-block">
+            <div class="team-block-header chickens">
+              <span style="font-size:22px;">🐔</span>
+              <span class="team-block-name chickens">De Kippen</span>
+              <button class="score-adj-btn minus" onclick="adjustTeamScore('chickens',-1)">−</button>
+              <span class="team-block-score chickens" id="chickensScoreBig">0</span>
+              <button class="score-adj-btn plus" onclick="adjustTeamScore('chickens',+1)">+</button>
+            </div>
+            <div class="team-members-list" id="chickensChips">
+              <div class="team-no-members">Nog niemand...</div>
+            </div>
+          </div>
+          <div class="section-divider">Spelers toewijzen</div>
+          <div class="assign-section" id="assignSection">
+            <div class="team-no-members">Nog geen spelers...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ MIDDLE: GAME CONTROLS ══════════════════════════════ -->
+      <div class="gm-col">
+        <div class="gm-col-header">🎮 Spel Beheer</div>
+        <div class="gm-col-body">
+          <div class="game-status-box">
+            <div class="status-dot" id="statusDot"></div>
+            <div class="status-info">
+              <div class="si-label">Status</div>
+              <div class="si-value" id="gameStatusText">Lobby – wachten op spelers</div>
+            </div>
+            <div style="font-size:24px;" id="statusIcon">⏳</div>
+          </div>
+          <div class="room-code-box">
+            <div class="room-code-label">🔐 Kamer Code</div>
+            <div class="room-code-val" id="roomCodeVal">------</div>
+            <div class="room-code-actions">
+              <button class="secondary" onclick="createNewCode()" style="flex:1;">🔄 Nieuw</button>
+            </div>
+          </div>
+          <button class="lock-toggle-btn unlocked" id="lockToggleBtn" onclick="toggleLock()">🔓 Spelers kunnen
+            joinen</button>
+          <div class="section-divider">Acties</div>
+          <div class="gm-btn-group">
+            <button class="primary full" id="btnStartGame" onclick="startGame()">▶️ Start Spel</button>
+            <button class="secondary full" id="btnNextPage" onclick="nextPage()" style="display:none;">➡️ Volgende
+              Pagina</button>
+            <button class="secondary full" id="btnBackHome" onclick="backToHome()" style="display:none;">🏠 Terug naar
+              Home</button>
+            <button class="warning full" id="btnPauseGame" onclick="togglePause()"
+              style="margin-top: 8px; font-weight: 800;">⏸️ PAUZE</button>
+          </div>
+          <!-- Active Minigame info moved to right column -->
+          <div class="section-divider">Danger Zone</div>
+          <div class="gm-btn-group">
+            <button class="warning full" onclick="revealWinner()">🏆 Onthul Winnaar</button>
+            <button class="danger full" onclick="resetGame()">🔄 Reset Spel (zonder kick)</button>
+            <button class="danger full" style="opacity: 0.7; font-size: 11px;" onclick="kickAllPlayers()">🚫 Kick Alle
+              Spelers</button>
+          </div>
+          <div id="gmScoreReveal"
+            style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;font-weight:700;line-height:1.5;white-space:pre-line;">
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ RIGHT: MINIGAMES (HALVED) ══════════════════════════ -->
+      <div class="gm-col">
+        <div class="gm-col-header">🕹️ Minigames</div>
+        <div class="gm-col-body" id="mgColBody"
+          style="display: flex; flex-direction: column; height: 100%; padding: 0; gap: 0;">
+          <!-- TOP: SELECTION -->
+          <div style="flex: 1.2; overflow-y: auto; padding: 16px; border-bottom: 2px solid var(--border);">
+            
+            <!-- TimeGuesser Results table (shows during/after challenge) -->
+            <div id="timeGuesserResults" class="hidden" style="width: 100%; background: var(--bg-surface); border-radius: 12px; padding: 15px; border: 1px solid var(--border); margin-bottom: 12px;">
+              <h3 style="margin: 0 0 10px 0; font-size: 14px; color: var(--accent);">📊 Resultaten</h3>
+              <div id="timeResultList" style="display: flex; flex-direction: column; gap: 6px;"></div>
+            </div>
+
+            <div id="mgList" style="display:flex;flex-direction:column;gap:8px;"></div>
+          </div>
+          <!-- BOTTOM: SETTINGS -->
+          <div id="mgActiveControlsCol"
+            style="flex: 1; overflow-y: auto; padding: 16px; background: rgba(124,58,237,0.04);">
+            <div class="section-divider" style="margin-bottom: 12px;">Game Instellingen</div>
+            
+            <div id="activeMgInfoBox" style="display: none; background: rgba(124, 58, 237, 0.1); border: 1.5px solid rgba(124, 58, 237, 0.3); border-radius: 14px; padding: 16px; margin-bottom: 16px; text-align: center;">
+              <div style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px;">Nu Bezig:</div>
+              <div id="activeMgName" style="font-family: 'Fredoka One', sans-serif; font-size: 20px; color: var(--accent);">—</div>
+              <div id="activeMgTimer" style="font-family: 'Fredoka One', sans-serif; font-size: 42px; background: linear-gradient(135deg, var(--neon-yellow), var(--neon-pink)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin: 4px 0;">00:00</div>
+              <div id="activeMgDesc" style="font-size: 11px; color: var(--text-muted); font-weight: 700; line-height: 1.4; margin-bottom: 12px;"></div>
+              <div id="activeMgLaunchControls"></div>
+            </div>
+
+            <div id="mgSettingsPlaceholder"
+              style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px; font-weight: 600;">
+              Geen actieve minigame</div>
+              <div id="hideAndSeekUI" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 800; color: var(--accent);">Ronde <span id="hasRound">1</span>/5</div>
+                  <div style="font-size: 11px; font-weight: 800; color: var(--text-muted); text-transform: uppercase;">Hide & Seek</div>
+                </div>
+                <div style="background: var(--bg-surface); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px;">
+                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px;">Zoekopdracht:</div>
+                  <div id="hasObject" style="font-size: 18px; font-weight: 800; color: var(--text);">—</div>
+                  <button class="secondary" style="width: 100%; font-size: 11px; padding: 6px; margin-top: 8px; border-radius: 8px;" onclick="nextHasObject()">🔄 Ander voorwerp</button>
+                </div>
+                <div class="section-divider">Wijs Winnaar Aan</div>
+                <div id="hasWinnerList" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;"></div>
+                <div class="section-divider" style="margin-top: 16px;">Controles</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                  <button class="warning" style="font-size: 11px; padding: 10px 0;" onclick="skipHasRound()">⏩ Skip Ronde</button>
+                  <button class="danger" style="font-size: 11px; padding: 10px 0;" onclick="stopMinigame()">🛑 Stop Spel</button>
+                </div>
+              </div>
+
+              <div id="imposterUI" style="display:none;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                  <div style="font-size: 16px; font-weight: 800; color: var(--accent);">🥸 The Imposter</div>
+                  <div id="imposterPhaseBadge" style="font-size: 9px; font-weight: 800; padding: 4px 8px; border-radius: 20px; background: var(--accent); color: white; text-transform: uppercase;">Reveal</div>
+                </div>
+                <div id="imposterWordBox" style="background: var(--bg-surface); padding: 12px; border-radius: 12px; border: 1px solid var(--border); margin-bottom: 16px; text-align: center;">
+                  <div style="font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 4px;">Geheim Woord:</div>
+                  <div id="imposterSecretWord" style="font-size: 22px; font-weight: 800; color: var(--accent);">???</div>
+                </div>
+                <div id="imposterPhaseControls" style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px;">
+                  <button id="btnImposterReveal" class="secondary" style="font-size: 11px; padding: 10px 0;" onclick="setImposterPhase('reveal')">👁️ Reveal</button>
+                  <button id="btnImposterDiscuss" class="secondary" style="font-size: 11px; padding: 10px 0;" onclick="setImposterPhase('discussion')">💬 Discussie</button>
+                  <button id="btnImposterVote" class="secondary" style="font-size: 11px; padding: 10px 0;" onclick="setImposterPhase('voting')">🗳️ Stemmen</button>
+                  <button id="btnImposterFinish" class="primary" style="font-size: 11px; padding: 10px 0;" onclick="finishImposterGame()">🏁 Finish</button>
+                </div>
+                <div id="imposterVotingUI" style="display:none;">
+                  <div class="section-divider">Wie heeft de Imposter geraden?</div>
+                  <div id="imposterVoteList" style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;"></div>
+                </div>
+                <div style="margin-top: 16px;">
+                  <button class="danger full" style="font-size: 11px; padding: 10px 0;" onclick="stopMinigame()">🛑 Stop Spel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  <!-- PLAYER INSPECT MODAL -->
+  <div id="inspectModal" class="modal-overlay">
+    <div class="modal-box" style="max-width: 500px; text-align: center; border: 2px solid var(--accent);">
+      <div id="inspectAvatar" style="font-size: 100px; margin-bottom: 20px;">👤</div>
+      <h2 id="inspectName" style="font-family: 'Fredoka One'; font-size: 40px; margin-bottom: 10px; color: var(--accent);">Naam</h2>
+      <p id="inspectEmail" style="color: var(--text-muted); margin-bottom: 30px; font-weight: 700; font-size: 16px;">email@familie.nl</p>
+      
+      <div style="background: rgba(255,255,255,0.05); border-radius: 20px; padding: 25px; text-align: left; margin-bottom: 25px; border: 1px solid var(--border);">
+        <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.1em; font-weight: 800;">🕵️ Rol / Status</div>
+        <div id="inspectRole" style="font-size: 24px; font-family: 'Fredoka One'; color: #fff; margin-bottom: 20px;">Geen actieve rol</div>
+        
+        <div style="font-size: 12px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; letter-spacing: 0.1em; font-weight: 800;">🚀 Geheime Missie</div>
+        <div id="inspectMission" style="font-size: 24px; font-family: 'Fredoka One'; color: #fbbf24; line-height: 1.3;">Geen missie toegewezen</div>
+      </div>
+
+      <button class="primary full" style="padding: 20px; font-size: 18px;" onclick="document.getElementById('inspectModal').classList.remove('show')">Sluiten</button>
+    </div>
+  </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+      if (!isUserLoggedIn()) { window.location.href = "index.html"; }
+      const GM_PASSWORD = "159758900";
+      let isMaster = false;
+      let currentState = null;
+      let allPlayers = [];
+      let selectedMgId = "";
+      let timerInterval = null;
+      let gmTimerStarted = false;
+
+      const MINIGAMES = [
+        { id: "HideAndSeek", icon: "🔍", name: "Hide and Seek", duration: 60, description: "De app kiest een voorwerp. Wie het als eerste vindt en bij de GM brengt, wint de ronde! (5 rondes)", color: "#22d3a5" },
+        { id: "Imposter", icon: "🥸", name: "The Imposter", duration: 3600, description: "Eén persoon is de Imposter en weet het woord niet. Vind de bedrieger voordat het te laat is!", color: "#f43f8e" },
+        { id: "TimeGuesser", icon: "⏱️", name: "20 Sec Challenge", duration: 40, description: "Druk precies na 20 seconden op de knop! (Marge: 17.5s - 22.5s)", color: "#fbbf24" }
+      ];
+
+      function checkGmStatus() {
+        const gmActive = sessionStorage.getItem("gmActive");
+        if (gmActive === "true") {
+          isMaster = true;
+          document.getElementById("gmModal").classList.remove("show");
+        } else {
+          isMaster = false;
+          document.getElementById("gmModal").classList.add("show");
+        }
+      }
+
+      function submitGmLogin() {
+        const name = document.getElementById("gmNameInput").value.trim();
+        const pass = document.getElementById("gmPassInput").value;
+        if (!name || pass !== GM_PASSWORD) {
+          document.getElementById("gmLoginErr").classList.remove("hidden");
+          return;
+        }
+        isMaster = true;
+        sessionStorage.setItem("gmActive", "true");
+        sessionStorage.setItem("gmName", name);
+        document.getElementById("gmModal").classList.remove("show");
+      }
+
+      function logoutGm() {
+        if (confirm("Uitloggen als Game Master?")) {
+          sessionStorage.removeItem("gmActive");
+          sessionStorage.removeItem("gmName");
+          window.location.reload();
+        }
+      }
+
+      function renderMinigames() {
+        const listEl = document.getElementById("mgList");
+        listEl.innerHTML = "";
+        MINIGAMES.forEach(mg => {
+          const card = document.createElement("div");
+          const isSelected = selectedMgId === mg.id;
+          const isCurrentlyActive = currentState && currentState.activeGameId === mg.id;
+          card.className = `mg-card ${isSelected ? 'selected' : ''} ${isCurrentlyActive ? 'running' : ''}`;
+          card.style.cursor = "pointer";
+          card.onclick = () => { selectedMgId = mg.id; renderMinigames(); };
+          card.innerHTML = `
+            <div style="display: flex; align-items: flex-start; gap: 14px; width: 100%;">
+              <div class="mg-card-icon" style="font-size: 36px; line-height: 1;">${mg.icon}</div>
+              <div class="mg-card-info" style="flex: 1; min-width: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                  <div style="font-weight: 800; font-size: 16px; color: var(--text);">${mg.name}</div>
+                  <div class="mg-duration-badge" style="margin-left: 8px;">${mg.duration}s</div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-muted); font-weight: 600; line-height: 1.5;">${mg.description}</div>
+              </div>
+            </div>
+          `;
+          
+          const btnStart = document.createElement("button");
+          btnStart.className = isCurrentlyActive ? "secondary full" : "success full";
+          btnStart.style.padding = "10px";
+          btnStart.style.fontSize = "13px";
+          btnStart.textContent = isCurrentlyActive ? "Huidige" : "Start Minigame";
+          btnStart.disabled = isCurrentlyActive;
+          btnStart.onclick = (e) => {
+            e.stopPropagation();
+            launchMinigame(mg.id);
+          };
+          card.appendChild(btnStart);
+          listEl.appendChild(card);
+        });
+      }
+
+      async function launchMinigame(id) {
+        const targetId = id || selectedMgId;
+        if (!targetId) return;
+        selectedMgId = targetId;
+        const mg = MINIGAMES.find(m => m.id === targetId);
+        await updateGameState({
+          gamePhase: "explanation",
+          activeGameId: mg.id,
+          activeGameName: mg.name,
+          activeGameDescription: mg.description,
+          activeGameDuration: mg.duration,
+          message: mg.description,
+          timerEnd: null
+        });
+        gmTimerStarted = true;
+      }
+
+      async function startHideAndSeekRound(roundNum) {
+        const mg = MINIGAMES.find(m => m.id === "HideAndSeek");
+        const randomObj = HOUSEHOLD_OBJECTS[Math.floor(Math.random() * HOUSEHOLD_OBJECTS.length)];
+        const timerEnd = Date.now() + mg.duration * 1000;
+        await updateGameState({
+          gamePhase: "active",
+          page: 5,
+          message: `Ronde ${roundNum}: Zoek ${randomObj}!`,
+          activeGameId: "HideAndSeek",
+          activeGameName: "Hide and Seek",
+          timerEnd: timerEnd,
+          minigameState: {
+            type: "HideAndSeek",
+            round: roundNum,
+            targetObject: randomObj,
+            status: "searching"
+          }
+        });
+        gmTimerStarted = false;
+      }
+
+      async function startTimeGuesserChallenge() {
+        await updateGameState({
+          activeGameId: "TimeGuesser",
+          activeGameName: "20 Sec Challenge",
+          gamePhase: "countdown",
+          countdownValue: 3,
+          message: "Maak je klaar... we gaan tellen!"
+        });
+
+        const snap = await db.collection("players").get();
+        const batch = db.batch();
+        snap.forEach(doc => batch.update(doc.ref, { timeResult: null, timeScore: 0 }));
+        await batch.commit();
+
+        let count = 3;
+        const interval = setInterval(async () => {
+          count--;
+          if (count > 0) {
+            await updateGameState({ countdownValue: count });
+          } else {
+            clearInterval(interval);
+            const gameStartTime = Date.now();
+            await updateGameState({
+              gamePhase: "active",
+              countdownValue: 0,
+              gameStartTime: gameStartTime,
+              timerEnd: gameStartTime + 30000, 
+              message: "Tellen maar! Klik bij precies 20 seconden!"
+            });
+          }
+        }, 1000);
+      }
+
+      async function startImposterGame() {
+        if (allPlayers.length < 1) {
+          alert("Je hebt minimaal 1 speler nodig!");
+          return;
+        }
+        const randomWord = IMPOSTER_WORDS[Math.floor(Math.random() * IMPOSTER_WORDS.length)];
+        const imposterIndex = Math.floor(Math.random() * allPlayers.length);
+        const imposter = allPlayers[imposterIndex];
+
+        const timerEnd = Date.now() + (3600 * 1000);
+        await updateGameState({
+          gamePhase: "active",
+          activeGameId: "Imposter",
+          activeGameName: "The Imposter",
+          message: "Bekijk je rol op je telefoon!",
+          timerEnd: timerEnd,
+          minigameState: {
+            type: "Imposter",
+            word: randomWord,
+            imposterName: imposter.name,
+            status: "reveal"
+          }
+        });
+        await clearAllVotes();
+        gmTimerStarted = false;
+      }
+
+      async function setImposterPhase(newStatus) {
+        if (!currentState || !currentState.minigameState) return;
+        const ms = { ...currentState.minigameState };
+        ms.status = newStatus;
+        let msg = "";
+        if (newStatus === "discussion") msg = "Praat met elkaar! Wie liegt er?";
+        if (newStatus === "voting") msg = "Tijd om te stemmen!";
+
+        await updateGameState({
+          "minigameState": ms,
+          message: msg
+        });
+      }
+
+      async function toggleImposterGuess(playerName) {
+        if (!currentState || !currentState.minigameState) return;
+        const ms = currentState.minigameState;
+        const imposterName = ms.imposterName;
+        await submitPlayerVote(playerName, imposterName);
+      }
+
+      async function finishImposterGame() {
+        if (!currentState || !currentState.minigameState) return;
+        const ms = currentState.minigameState;
+        const imposterName = ms.imposterName;
+
+        const imposterPlayer = allPlayers.find(p => p.name === imposterName);
+        const imposterTeam = imposterPlayer ? imposterPlayer.team : "wolves";
+        const otherTeam = imposterTeam === "wolves" ? "chickens" : "wolves";
+
+        const ts = { ...currentState.teamScores };
+
+        let correctVotes = 0;
+        allPlayers.forEach(p => {
+          if (p.name !== imposterName && p.vote === imposterName) {
+            correctVotes++;
+          }
+        });
+
+        if (correctVotes === 0) {
+          ts[imposterTeam] += 1;
+        } else {
+          ts[otherTeam] += correctVotes;
+        }
+
+        await updateGameState({
+          teamScores: ts,
+          gamePhase: "ended",
+          message: `De Imposter was ${imposterName}!`,
+          "minigameState.status": "ended"
+        });
+      }
+
+      async function changeHasRound(delta) {
+        if (!currentState || !currentState.minigameState) return;
+        const currentRound = currentState.minigameState.round || 1;
+        const nextRound = Math.max(1, Math.min(5, currentRound + delta));
+        await startHideAndSeekRound(nextRound);
+      }
+
+      async function nextHasObject() {
+        if (!currentState || !currentState.minigameState) return;
+        const mg = MINIGAMES.find(m => m.id === "HideAndSeek");
+        const randomObj = HOUSEHOLD_OBJECTS[Math.floor(Math.random() * HOUSEHOLD_OBJECTS.length)];
+        const timerEnd = Date.now() + (mg.duration * 1000);
+
+        const newMs = { ...currentState.minigameState };
+        newMs.targetObject = randomObj;
+        newMs.status = "searching";
+
+        await updateGameState({
+          message: `Ronde ${newMs.round}: Zoek ${randomObj}!`,
+          timerEnd: timerEnd,
+          minigameState: newMs
+        });
+      }
+
+      async function skipHasRound() {
+        if (!confirm("Huidige ronde overslaan?")) return;
+        const currentRound = currentState.minigameState.round;
+        if (currentRound < 3) await startHideAndSeekRound(currentRound + 1);
+        else await updateGameState({ gamePhase: "ended", timerEnd: null });
+      }
+
+      async function beginTimer(mg) {
+        if (mg.id === "HideAndSeek") {
+          await startHideAndSeekRound(1);
+          return;
+        }
+        if (mg.id === "Imposter") {
+          await startImposterGame();
+          return;
+        }
+        if (mg.id === "TimeGuesser") {
+          await startTimeGuesserChallenge();
+          return;
+        }
+
+        const timerEnd = Date.now() + mg.duration * 1000;
+        await updateGameState({ gamePhase: "active", page: 5, message: mg.description, timerEnd });
+        gmTimerStarted = false;
+      }
+
+      async function stopMinigame() {
+        if (!confirm("Minigame nu stoppen?")) return;
+        clearInterval(timerInterval);
+        await updateGameState({ gamePhase: "ended", timerEnd: null });
+      }
+
+      async function resetAllReady() {
+        const snap = await db.collection("players").get();
+        const batch = db.batch();
+        snap.forEach(doc => batch.update(doc.ref, { ready: false }));
+        await batch.commit();
+      }
+
+      async function backToHome() {
+        clearInterval(timerInterval);
+        await updateGameState({
+          status: "playing",
+          gamePhase: "ready",
+          page: 3,
+          message: "",
+          activeGameId: "",
+          activeGameName: "",
+          timerEnd: null,
+          minigameState: null
+        });
+        await clearAllVotes();
+        await resetAllReady();
+        selectedMgId = "";
+        gmTimerStarted = false;
+      }
+
+      async function nextPage() {
+        if (!currentState) return;
+        const next = (currentState.page || 1) + 1;
+        const msgs = {
+          1: "Welkom bij The Wonder Games!",
+          2: "Verbind je telefoon en kies een team.",
+          3: "Lees de spelregels goed door.",
+          4: "Let op! Houd je telefoon bij de hand.",
+          5: "Zijn jullie er klaar voor?"
+        };
+        await updateGameState({
+          page: next,
+          message: msgs[next] || "",
+          gamePhase: next === 5 ? "ready" : "story"
+        });
+      }
+
+      async function startGame() {
+        await updateGameState({
+          status: "playing",
+          page: 1,
+          gamePhase: "story",
+          message: "Welkom bij The Wonder Games! Bereid je voor op een geweldige avond."
+        });
+      }
+
+      async function toggleLock() {
+        await setLocked(!currentState.isLocked);
+      }
+
+      async function adjustTeamScore(team, delta) {
+        const ts = currentState.teamScores || { wolves: 0, chickens: 0 };
+        const updated = { ...ts };
+        updated[team] = Math.max(0, updated[team] + delta);
+        await updateGameState({ teamScores: updated });
+      }
+
+      async function createNewCode() {
+        const code = await createNewRoomCode();
+        document.getElementById("roomCodeVal").textContent = code;
+      }
+
+      async function revealWinner() {
+        if (!currentState) return;
+        const ts = currentState.teamScores || { wolves: 0, chickens: 0 };
+        let winnerTeam = "";
+        if (ts.wolves > ts.chickens) winnerTeam = "wolves";
+        else if (ts.chickens > ts.wolves) winnerTeam = "chickens";
+        else winnerTeam = "draw";
+
+        await updateGameState({
+          gamePhase: "winner_reveal",
+          winnerTeam: winnerTeam,
+          status: "ended",
+          message: winnerTeam === "draw" ? "Het is gelijkspel!" : (winnerTeam === "wolves" ? "De Wolven hebben gewonnen!" : "De Kippen hebben gewonnen!")
+        });
+      }
+
+      async function kickAllPlayers() {
+        if (!confirm("Weet je zeker dat je ALLE spelers wilt verwijderen?")) return;
+        await clearAllPlayers();
+      }
+
+      async function togglePause() {
+        if (!currentState) return;
+        const newPaused = !currentState.isPaused;
+        const updates = { isPaused: newPaused };
+
+        if (newPaused) {
+          if (currentState.timerEnd) {
+            const rem = Math.max(0, currentState.timerEnd - Date.now());
+            updates.pausedTimeRemaining = rem;
+            updates.timerEnd = null;
+          }
+        } else {
+          if (currentState.pausedTimeRemaining) {
+            updates.timerEnd = Date.now() + currentState.pausedTimeRemaining;
+            updates.pausedTimeRemaining = 0;
+          }
+        }
+
+        await updateGameState(updates);
+      }
+
+      async function resetGame() {
+        if (!confirm("Weet je zeker? Scores en voortgang worden gewist (spelers blijven).")) return;
+        clearInterval(timerInterval);
+        gmTimerStarted = false; selectedMgId = "";
+        await clearAllVotes();
+        await updateGameState({
+          status: "lobby", isLocked: false, page: 1, message: "", gamePhase: "lobby",
+          activeGameId: "", activeGameName: "", activeGameDescription: "",
+          activeGameDuration: null, timerEnd: null, showBetween: false,
+          minigameState: null,
+          teamScores: { wolves: 0, chickens: 0 }
+        });
+      }
+
+      function renderAssign(players) {
+        const el = document.getElementById("assignSection");
+        if (players.length === 0) { el.innerHTML = '<div class="team-no-members">Nog geen spelers...</div>'; return; }
+        el.innerHTML = "";
+        players.forEach((p, idx) => {
+          const row = document.createElement("div");
+          row.className = "assign-row";
+          const wA = p.team === "wolves" ? "active" : "";
+          const cA = p.team === "chickens" ? "active" : "";
+          const safeName = JSON.stringify(p.name);
+          row.innerHTML = `
+          <span class="ar-icon">${p.icon}</span><span class="ar-name">${p.name}</span>
+          <button class="team-chip-btn wolves ${wA}" onclick='assignTeam(${safeName},"wolves")'>🐺</button>
+          <button class="team-chip-btn chickens ${cA}" onclick='assignTeam(${safeName},"chickens")'>🐔</button>
+          <button class="secondary" style="padding: 2px 8px; border-radius: 6px; font-size: 14px;" onclick="openPlayerInspectByIndex(${idx})">ℹ️</button>
+          <button class="remove-chip-btn" onclick='removePlayerGm(${safeName})'>✕</button>`;
+          el.appendChild(row);
+        });
+      }
+
+      function openPlayerInspectByIndex(index) {
+        if (allPlayers[index]) {
+          openPlayerInspect(allPlayers[index]);
+        }
+      }
+
+      function openPlayerInspect(player) {
+        const modal = document.getElementById("inspectModal");
+        document.getElementById("inspectAvatar").textContent = player.icon || "👤";
+        document.getElementById("inspectName").textContent = player.name;
+        document.getElementById("inspectEmail").textContent = player.email || "Geen email bekend";
+        
+        let roleInfo = "Geen actieve rol";
+        if (currentState && currentState.activeGameId === "Imposter" && currentState.minigameState) {
+          const ms = currentState.minigameState;
+          if (ms.imposterName === player.name) {
+            roleInfo = "Jij bent de IMPOSTER! 🕵️";
+          } else {
+            roleInfo = `Het woord is: ${ms.word}`;
+          }
+        }
+        document.getElementById("inspectRole").textContent = roleInfo;
+        document.getElementById("inspectMission").textContent = player.secretMission || "Geen missie toegewezen";
+        
+        modal.classList.add("show");
+      }
+
+      async function assignTeam(name, team) {
+        await db.collection("players").doc(playerDocId(name)).update({ team, LastAction: new Date().toISOString() });
+      }
+
+      async function removePlayerGm(name) {
+        if (confirm(`Verwijder ${name}?`)) await removePlayer(name);
+      }
+
+      function renderTeamChips(players) {
+        const wolves = players.filter(p => p.team === "wolves");
+        const chickens = players.filter(p => p.team === "chickens");
+        const b = (id, list) => {
+          const el = document.getElementById(id);
+          if (list.length === 0) { el.innerHTML = '<div class="team-no-members">Nog niemand...</div>'; return; }
+          el.innerHTML = "";
+          list.forEach(p => {
+            const c = document.createElement("div");
+            c.className = "team-member-chip";
+            c.innerHTML = `<span class="chip-icon">${p.icon}</span><span>${p.name}</span>`;
+            el.appendChild(c);
+          });
+        };
+        b("wolvesChips", wolves); b("chickensChips", chickens);
+      }
+
+      function startDisplayTimer(timerEnd) {
+        clearInterval(timerInterval);
+        const tick = () => {
+          const rem = Math.max(0, Math.round((timerEnd - Date.now()) / 1000));
+          document.getElementById("activeMgTimer").textContent = `${String(Math.floor(rem / 60)).padStart(2, "0")}:${String(rem % 60).padStart(2, "0")}`;
+          if (rem <= 0) {
+            clearInterval(timerInterval);
+            if (currentState.activeGameId === "HideAndSeek" && currentState.minigameState) {
+              const newMs = { ...currentState.minigameState };
+              newMs.status = "round_ended";
+              updateGameState({
+                minigameState: newMs,
+                timerEnd: null,
+                message: "Tijd is om! Op naar de volgende ronde?"
+              });
+            } else if (currentState.activeGameId === "Imposter") {
+              console.log("Imposter timer reached 0, but ignoring.");
+            } else {
+              updateGameState({ gamePhase: "ended" });
+            }
+          }
+        };
+        tick(); timerInterval = setInterval(tick, 500);
+      }
+
+      function renderTimeResults() {
+        const listEl = document.getElementById("timeResultList");
+        listEl.innerHTML = "";
+        
+        const sorted = [...allPlayers].sort((a,b) => {
+          if (!a.timeResult) return 1;
+          if (!b.timeResult) return -1;
+          return a.timeResult - b.timeResult;
+        });
+
+        sorted.forEach(p => {
+          if (!p.timeResult) return;
+          const row = document.createElement("div");
+          row.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: rgba(255,255,255,0.05); border-radius: 8px; font-size: 13px;";
+          
+          const isWinner = p.timeScore > 0;
+          row.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span>${p.icon}</span>
+              <span style="font-weight: 700;">${p.name}</span>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-family: 'Fredoka One'; color: ${isWinner ? 'var(--neon-green)' : 'var(--text-muted)'}">${p.timeResult.toFixed(2)}s</span>
+              <span>${isWinner ? '✅ +1' : '❌'}</span>
+            </div>
+          `;
+          listEl.appendChild(row);
+        });
+      }
+
+      function updateUi(state) {
+        currentState = state;
+        if (!state) return;
+
+        // --- Common Elements ---
+        const statusText = document.getElementById("gameStatusText");
+        const topBadge = document.getElementById("topStatusBadge");
+        const btnStart = document.getElementById("btnStartGame");
+        const btnNext = document.getElementById("btnNextPage");
+        const btnPause = document.getElementById("btnPauseGame");
+        const infoBox = document.getElementById("activeMgInfoBox");
+        const btnBox = document.getElementById("activeMgLaunchControls");
+        const mgName = document.getElementById("activeMgName");
+        const mgDesc = document.getElementById("activeMgDesc");
+        const timerEl = document.getElementById("activeMgTimer");
+        const btnBackHome = document.getElementById("btnBackHome");
+        const dot = document.getElementById("statusDot");
+
+        if (btnBackHome) {
+          const isLobby = state.status === "lobby";
+          const hasGame = !!state.activeGameId;
+          const isEnded = state.gamePhase === "ended";
+          const isStory = state.gamePhase === "story";
+          btnBackHome.style.display = (!isLobby && (hasGame || isEnded || isStory)) ? "block" : "none";
+        }
+
+        // Team Scores
+        const ts = state.teamScores || { wolves: 0, chickens: 0 };
+        document.getElementById("wolvesScoreBig").textContent = ts.wolves || 0;
+        document.getElementById("chickensScoreBig").textContent = ts.chickens || 0;
+        if (state.roomCode) document.getElementById("roomCodeVal").textContent = state.roomCode;
+        
+        const lockBtn = document.getElementById("lockToggleBtn");
+        lockBtn.className = "lock-toggle-btn " + (state.isLocked ? "locked" : "unlocked");
+        lockBtn.textContent = state.isLocked ? "🔒 Spelers kunnen NIET joinen" : "🔓 Spelers kunnen joinen";
+
+        if (btnPause) {
+          btnPause.textContent = state.isPaused ? "▶️ HERVAT SPEL" : "⏸️ PAUZE";
+          btnPause.className = state.isPaused ? "success full" : "warning full";
+          btnPause.onclick = togglePause;
+        }
+
+        // --- Phase Logic ---
+        
+        // 1. LOBBY
+        if (state.status === "lobby") {
+          if(dot) dot.className = "status-dot inactive";
+          statusText.textContent = "Lobby – wachten op spelers";
+          if(topBadge) topBadge.textContent = "🔴 Lobby";
+          btnStart.style.display = "block";
+          btnNext.style.display = "none";
+          infoBox.style.display = "none";
+          renderMinigames();
+          return;
+        }
+
+        btnStart.style.display = "none";
+        if(dot) dot.className = "status-dot";
+
+        // --- Game Specific UI visibility ---
+        const placeholder = document.getElementById("mgSettingsPlaceholder");
+        const hasUI = document.getElementById("hideAndSeekUI");
+        const imposterUI = document.getElementById("imposterUI");
+        const tgResults = document.getElementById("timeGuesserResults");
+
+        if (placeholder) placeholder.style.display = (state.activeGameId) ? "none" : "block";
+        if (hasUI) hasUI.style.display = (state.activeGameId === "HideAndSeek") ? "block" : "none";
+        if (imposterUI) imposterUI.style.display = (state.activeGameId === "Imposter") ? "block" : "none";
+
+        if (state.activeGameId === "HideAndSeek" && hasUI) {
+          const ms = state.minigameState || {};
+          const hrEl = document.getElementById("hasRound");
+          const hoEl = document.getElementById("hasObject");
+          if(hrEl) hrEl.textContent = ms.round || 1;
+          if(hoEl) hoEl.textContent = ms.targetObject || "Wachten op start...";
+          const winnerList = document.getElementById("hasWinnerList");
+          if (winnerList) {
+            winnerList.innerHTML = `
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <button class="secondary full" style="font-size: 11px; padding: 12px 0;" onclick="changeHasRound(-1)" ${(!ms.round || ms.round <= 1) ? 'disabled' : ''}>⬅️ Vorige Ronde</button>
+                <button class="primary full" style="font-size: 11px; padding: 12px 0;" onclick="changeHasRound(1)" ${(ms.round >= 5) ? 'disabled' : ''}>Volgende Ronde ➡️</button>
+              </div>
+            `;
+          }
+        }
+        
+        if (state.activeGameId === "Imposter" && imposterUI) {
+          const ms = state.minigameState || {};
+          const iswEl = document.getElementById("imposterSecretWord");
+          const ipbEl = document.getElementById("imposterPhaseBadge");
+          if(iswEl) iswEl.textContent = ms.word || "???";
+          if(ipbEl) ipbEl.textContent = ms.status || "reveal";
+          const votingArea = document.getElementById("imposterVotingUI");
+          if (votingArea) votingArea.style.display = (ms.status === "voting") ? "block" : "none";
+          if (ms.status === "voting") {
+            const voteList = document.getElementById("imposterVoteList");
+            if (voteList) {
+              voteList.innerHTML = "";
+              allPlayers.forEach(p => {
+                const votedFor = p.votedFor;
+                const isImposter = p.name === ms.imposterName;
+                const votedCorrect = votedFor === ms.imposterName;
+                
+                const card = document.createElement("div");
+                card.className = "secondary full";
+                card.style.cssText = `
+                  display: flex; justify-content: space-between; align-items: center; 
+                  padding: 10px 14px; border-radius: 8px; margin-bottom: 6px; 
+                  background: ${isImposter ? 'rgba(251, 191, 36, 0.1)' : 'rgba(255,255,255,0.05)'};
+                  border: 1px solid ${isImposter ? '#fbbf24' : 'rgba(255,255,255,0.1)'};
+                  color: #fff;
+                `;
+                
+                let label = `<div><span style="margin-right:8px;">${p.icon}</span> <b>${p.name}</b>`;
+                if (isImposter) label += " <span style='color:#fbbf24; font-size:10px; margin-left: 5px;'>IMPOSTER</span>";
+                label += "</div>";
+                
+                let status = "";
+                if (votedFor) {
+                  status = votedCorrect ? "✅" : "❌";
+                } else if (isImposter) {
+                  status = "🕵️";
+                } else {
+                  status = "⏳";
+                }
+                
+                card.innerHTML = `${label} <span style="font-size:18px;">${status}</span>`;
+                voteList.appendChild(card);
+              });
+            }
+          }
+        }
+
+        if (tgResults) {
+          if (state.activeGameId === "TimeGuesser" && (state.gamePhase === "active" || state.gamePhase === "ended")) {
+            tgResults.classList.remove("hidden");
+            renderTimeResults();
+          } else {
+            tgResults.classList.add("hidden");
+          }
+        }
+
+        // 2. ACTIVE GAME
+        if (state.gamePhase === "active") {
+          const isImposter = state.activeGameId === "Imposter";
+          statusText.textContent = `🎮 ${state.activeGameName} bezig!`;
+          if(topBadge) topBadge.textContent = "🟢 Actief";
+          mgName.textContent = state.activeGameName;
+          mgDesc.textContent = state.message || "";
+          infoBox.style.display = "block";
+          btnNext.style.display = "none";
+          
+          if (isImposter) {
+            timerEl.style.visibility = "hidden";
+            if (state.timerEnd) startDisplayTimer(state.timerEnd);
+          } else if (state.isPaused && state.pausedTimeRemaining) {
+            timerEl.style.visibility = "visible";
+            const rem = Math.round(state.pausedTimeRemaining / 1000);
+            timerEl.textContent = `${String(Math.floor(rem / 60)).padStart(2, "0")}:${String(rem % 60).padStart(2, "0")}`;
+          } else {
+            timerEl.style.visibility = "visible";
+            startDisplayTimer(state.timerEnd);
+          }
+
+          btnBox.innerHTML = `<button class="danger full" onclick="stopMinigame()">🛑 Stop Minigame</button>`;
+          renderMinigames();
+          return;
+        }
+
+        const evR = allPlayers.length > 0 && allPlayers.every(p => p.ready);
+
+        // 3. READY CHECK
+        if (state.gamePhase === "ready") {
+          statusText.textContent = "⚡ Ready check";
+          if(topBadge) topBadge.textContent = "⚡ Ready?";
+          mgName.textContent = state.activeGameName;
+          mgDesc.textContent = state.message || "";
+          infoBox.style.display = state.activeGameId ? "block" : "none";
+          btnNext.style.display = "none";
+          
+          const mg = MINIGAMES.find(m => m.id === state.activeGameId);
+          
+          if (state.activeGameId) {
+            btnBox.innerHTML = `
+              <button class="${evR ? 'success' : 'warning'} full" ${!evR ? 'disabled' : ''} onclick='beginTimer(${JSON.stringify(mg)})'>
+                ${evR ? '⏱️ Start Timer' : '⏱️ Wachten op spelers...'}
+              </button>
+            `;
+          } else {
+            btnBox.innerHTML = `<button class="success full" onclick="launchMinigame()">🚀 Start Minigame</button>`;
+          }
+          renderMinigames();
+          return;
+        }
+
+        // 4. EXPLANATION
+        if (state.gamePhase === "explanation") {
+          statusText.textContent = `📋 Uitleg: ${state.activeGameName}`;
+          if(topBadge) topBadge.textContent = "📋 Uitleg";
+          mgName.textContent = state.activeGameName;
+          mgDesc.textContent = state.message || "";
+          infoBox.style.display = "block";
+          btnNext.style.display = "block";
+          btnNext.textContent = "⚡ Start Ready Check";
+          btnNext.onclick = async () => { await updateGameState({ gamePhase: "ready" }); };
+          
+          const isImposter = state.activeGameId === "Imposter";
+          const isHAS = state.activeGameId === "HideAndSeek";
+          const isTG = state.activeGameId === "TimeGuesser";
+          
+          btnBox.innerHTML = `
+            <button class="${evR ? 'success' : 'warning'} full" onclick="${isHAS ? 'startHideAndSeekRound(1)' : (isTG ? 'startTimeGuesserChallenge()' : (isImposter ? 'startImposterGame()' : 'updateGameState({ gamePhase: \'ready\' })'))}">
+              ${evR ? '🚀 Iedereen klaar! Start' : (isHAS ? '🚀 Start Ronde 1' : (isTG ? '🚀 Start Countdown' : (isImposter ? '🚀 Start Imposter Game' : '⚡ Start Ready Check')))}
+            </button>
+          `;
+          renderMinigames();
+          return;
+        }
+
+        // 5. ENDED
+        if (state.gamePhase === "ended") {
+          statusText.textContent = "⏰ Tijd is om!";
+          if(topBadge) topBadge.textContent = "⏰ Tijd!";
+          infoBox.style.display = "none";
+          btnNext.style.display = "none";
+          renderMinigames();
+          return;
+        }
+
+        // 6. STORY / INTRO
+        if (state.gamePhase === "story") {
+          statusText.textContent = `Pagina ${state.page}`;
+          if(topBadge) topBadge.textContent = `📄 P${state.page}`;
+          infoBox.style.display = "none";
+          btnNext.style.display = (state.page < 5) ? "block" : "none";
+          btnNext.textContent = "➡️ Volgende Pagina";
+          btnNext.onclick = nextPage;
+          renderMinigames();
+          return;
+        }
+
+        // Default
+        infoBox.style.display = "none";
+        renderMinigames();
+      }
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        checkGmStatus(); await ensureGameState(); renderMinigames();
+        listenToGameState(state => updateUi(state));
+        listenToPlayers(players => { 
+          allPlayers = players; 
+          renderTeamChips(players); 
+          renderAssign(players); 
+          renderTimeResults();
+          if (currentState) updateUi(currentState);
+        });
+      });
+    </script>
+</body>
+
+</html>

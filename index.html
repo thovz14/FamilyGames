@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="nl">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Wonder Games</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="icon" type="image/jpeg" href="Wonderlight Studios logo.jpeg">
+
+  <style>
+    .login-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(17, 24, 39, 0.95), rgba(24, 23, 37, 0.95));
+      z-index: 5000;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+
+    .login-overlay.show {
+      display: flex;
+    }
+
+    .login-box {
+      background: var(--bg-card);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: var(--radius-lg);
+      padding: 48px 40px;
+      width: min(420px, 94vw);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+      animation: slideUp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes slideUp {
+      from {
+        transform: translateY(30px);
+        opacity: 0;
+      }
+
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    .login-title {
+      font-family: 'Fredoka One', sans-serif;
+      font-size: 28px;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+
+    .login-subtitle {
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 28px;
+    }
+
+    .login-form {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .login-field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .login-field label {
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+    }
+
+    .login-field input {
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-surface);
+      color: var(--text);
+      font-size: 15px;
+      font-family: 'Nunito', sans-serif;
+      transition: all 0.2s ease;
+    }
+
+    .login-field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(124, 58, 237, 0.2);
+    }
+
+    .login-error {
+      color: var(--neon-pink);
+      font-size: 12px;
+      font-weight: 700;
+      display: none;
+    }
+
+    .login-error.show {
+      display: block;
+    }
+
+    .login-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .login-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 800;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-family: 'Nunito', sans-serif;
+    }
+
+    .login-btn.primary {
+      background: linear-gradient(135deg, var(--accent), #6d28d9);
+      color: white;
+    }
+
+    .login-btn.primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(124, 58, 237, 0.3);
+    }
+
+    .login-btn.primary:active {
+      transform: translateY(0);
+    }
+
+    .login-divider {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin: 8px 0;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+    }
+
+    .login-divider::before,
+    .login-divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      opacity: 0.5;
+    }
+
+    .login-btn.google {
+      background: #ffffff;
+      color: #1f2937;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid #e5e7eb;
+      text-transform: none;
+      letter-spacing: normal;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+
+    .login-btn.google:hover {
+      background: #f9fafb;
+      border-color: #d1d5db;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .google-icon {
+      width: 18px;
+      height: 18px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- LOGIN OVERLAY -->
+  <div class="login-overlay show" id="loginOverlay">
+    <div class="login-box">
+      <div class="login-title">🔐 Inloggen</div>
+      <div class="login-subtitle">Voer je inloggegevens in</div>
+      <form class="login-form" id="loginForm" onsubmit="handleLogin(event)">
+        <div class="login-field">
+          <label for="loginUsername">E-mailadres</label>
+          <input type="email" id="loginUsername" placeholder="Voer je e-mailadres in" autocomplete="off" required>
+        </div>
+        <div class="login-field">
+          <label for="loginPassword">Wachtwoord</label>
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="off" required>
+        </div>
+        <div class="login-error" id="loginError"></div>
+        <div class="login-buttons">
+          <button type="submit" class="login-btn primary">Inloggen</button>
+        </div>
+        <div class="login-divider">of</div>
+        <button type="button" class="login-btn google" onclick="handleGoogleLogin()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" class="google-icon" alt="Google">
+          Inloggen met Google
+        </button>
+      </form>
+    </div>
+  </div>
+  <div class="container">
+    <div class="header">
+      <span class="logo-icon">🎮</span>
+      <h1>The Wonder Games</h1>
+      <p>Family Interaction Platform</p>
+    </div>
+
+    <div class="index-grid">
+      <div class="tile" onclick="navigateTo('play.html')" style="cursor:pointer;">
+        <span class="tile-icon" style="animation: float 3s ease-in-out infinite;">📱</span>
+        <h2>Speler</h2>
+        <p>Gebruik je telefoon als controller en doe mee</p>
+        <button class="primary" style="pointer-events: none;">Join Game</button>
+      </div>
+
+      <div class="tile" onclick="navigateTo('tv.html')" style="cursor:pointer;">
+        <span class="tile-icon" style="animation: float 3s ease-in-out infinite 0.6s;">📺</span>
+        <h2>TV Display</h2>
+        <p>Zet op het grote scherm voor iedereen</p>
+        <button class="success" style="pointer-events: none;">TV Modus</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top: 28px; animation-delay: 0.2s;">
+      <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 14px;">
+        <span style="font-size: 28px;">✨</span>
+        <h3 style="font-size: 20px;">Hoe werkt het?</h3>
+      </div>
+      <div style="display: grid; gap: 12px;">
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; flex-shrink: 0;">1️⃣</span>
+          <p style="color: var(--text-muted); line-height: 1.5; font-weight: 600;">Open de <strong
+              style="color: var(--text);">TV Display</strong> op het grote scherm (Raspberry Pi of laptop aan de TV).
+          </p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; flex-shrink: 0;">2️⃣</span>
+          <p style="color: var(--text-muted); line-height: 1.5; font-weight: 600;">Spelers openen <strong
+              style="color: var(--text);">Speler</strong> op hun telefoon en kiezen een naam en avatar.</p>
+        </div>
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+          <span style="font-size: 20px; flex-shrink: 0;">3️⃣</span>
+          <p style="color: var(--text-muted); line-height: 1.5; font-weight: 600;">De Game Master drukt op <strong
+              style="color: var(--text);">Start Game</strong> en beheert het spel!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="script.js?v=1.1"></script>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      if (isUserLoggedIn()) {
+        document.getElementById("loginOverlay").classList.remove("show");
+
+        // Auto-redirect naar play.html als speler al in een game zit
+        const myName = getDisplayName();
+        const exists = await checkPlayerExists(myName);
+        if (exists) {
+          window.location.href = "play.html";
+        }
+      } else {
+        document.getElementById("loginOverlay").classList.add("show");
+      }
+    });
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const username = document.getElementById("loginUsername").value.trim();
+      const password = document.getElementById("loginPassword").value;
+      const errorEl = document.getElementById("loginError");
+
+      if (!username || !password) {
+        errorEl.textContent = "Voer gebruikersnaam en wachtwoord in";
+        errorEl.classList.add("show");
+        return;
+      }
+
+      const success = await verifyLogin(username, password);
+      if (success) {
+        errorEl.classList.remove("show");
+        document.getElementById("loginOverlay").classList.remove("show");
+        document.getElementById("loginForm").reset();
+
+        // Check of speler al in game zit na login
+        const myName = getDisplayName();
+        const exists = await checkPlayerExists(myName);
+        if (exists) {
+          window.location.href = "play.html";
+        }
+      } else {
+        errorEl.textContent = "Ongeldige gebruikersnaam of wachtwoord";
+        errorEl.classList.add("show");
+      }
+    }
+
+    async function signInWithGoogle() {
+      console.log("index.html: signInWithGoogle internal called");
+      try {
+        const provider = new firebase.auth.GoogleAuthProvider();
+        const result = await auth.signInWithPopup(provider);
+        
+        if (result.additionalUserInfo.isNewUser) {
+          console.warn("index.html: New user detected, deleting...");
+          await result.user.delete();
+          await auth.signOut();
+          throw new Error("Geen account gevonden. Je kunt geen nieuw account aanmaken met Google.");
+        }
+        
+        return true;
+      } catch (error) {
+        console.error("index.html: Google Login Error:", error);
+        throw error;
+      }
+    }
+
+    async function handleGoogleLogin() {
+      const errorEl = document.getElementById("loginError");
+      errorEl.classList.remove("show");
+
+      console.log("index.html: handleGoogleLogin called");
+      console.log("index.html: typeof signInWithGoogle =", typeof signInWithGoogle);
+
+      try {
+        if (typeof signInWithGoogle !== "function") {
+          throw new Error("Systeemfout: signInWithGoogle is niet geladen. Vernieuw de pagina.");
+        }
+        const success = await signInWithGoogle();
+        if (success) {
+          document.getElementById("loginOverlay").classList.remove("show");
+          
+          // Check of speler al in game zit na login
+          const myName = getDisplayName();
+          const exists = await checkPlayerExists(myName);
+          if (exists) {
+            window.location.href = "play.html";
+          }
+        }
+      } catch (error) {
+        console.error("index.html: Login error:", error);
+        errorEl.textContent = error.message || "Fout bij inloggen met Google";
+        errorEl.classList.add("show");
+      }
+    }
+
+    function navigateTo(page) {
+      if (isUserLoggedIn()) {
+        window.location.href = page;
+      } else {
+        document.getElementById("loginOverlay").classList.add("show");
+      }
+    }
+  </script>
+</body>
+
+</html>
