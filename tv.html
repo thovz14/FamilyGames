@@ -151,7 +151,7 @@
       text-transform: uppercase;
       letter-spacing: 0.12em;
       color: #fff;
-      text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }
 
     .math-tower-card.team-wolves .math-tower-title {
@@ -181,10 +181,12 @@
         transform: scale(0) translateY(-40px);
         opacity: 0;
       }
+
       60% {
         transform: scale(1.2);
         opacity: 1;
       }
+
       100% {
         transform: scale(1) translateY(0);
         opacity: 1;
@@ -200,6 +202,7 @@
         opacity: 1;
         transform: scale(1);
       }
+
       100% {
         opacity: 0;
         transform: scale(0.2) translateY(-60px);
@@ -224,9 +227,12 @@
     }
 
     @keyframes towerFlash {
-      0%, 100% {
+
+      0%,
+      100% {
         filter: brightness(1);
       }
+
       50% {
         filter: brightness(1.4) saturate(1.2);
       }
@@ -236,7 +242,7 @@
       width: 120px;
       height: 120px;
       border-radius: 12px;
-      box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35);
       border: none;
       transform-origin: center;
       transition: transform 0.4s ease;
@@ -253,9 +259,11 @@
         transform: scale(0) rotateZ(-15deg);
         opacity: 0;
       }
+
       50% {
         opacity: 1;
       }
+
       100% {
         transform: scale(1) rotateZ(0deg);
         opacity: 1;
@@ -271,40 +279,112 @@
         transform: scale(1);
         filter: brightness(1);
       }
+
       50% {
         filter: brightness(0.6);
       }
+
       100% {
         transform: scale(0.85) translateY(0);
         opacity: 0.3;
       }
     }
 
-    .math-tower-block.wolves-0 { background: #ef4444; }
-    .math-tower-block.wolves-1 { background: #f97316; }
-    .math-tower-block.wolves-2 { background: #eab308; }
-    .math-tower-block.wolves-3 { background: #22c55e; }
-    .math-tower-block.wolves-4 { background: #3b82f6; }
-    .math-tower-block.wolves-5 { background: #a855f7; }
-    .math-tower-block.wolves-6 { background: #8b5cf6; }
-    .math-tower-block.wolves-7 { background: #1f2937; }
-    .math-tower-block.wolves-8 { background: #f3f4f6; }
-    .math-tower-block.wolves-9 { background: #ec4899; }
-    .math-tower-block.wolves-10 { background: #06b6d4; }
-    .math-tower-block.wolves-11 { background: #f0a000; }
+    .math-tower-block.wolves-0 {
+      background: #ef4444;
+    }
 
-    .math-tower-block.chickens-0 { background: #ef4444; }
-    .math-tower-block.chickens-1 { background: #f97316; }
-    .math-tower-block.chickens-2 { background: #eab308; }
-    .math-tower-block.chickens-3 { background: #22c55e; }
-    .math-tower-block.chickens-4 { background: #3b82f6; }
-    .math-tower-block.chickens-5 { background: #a855f7; }
-    .math-tower-block.chickens-6 { background: #8b5cf6; }
-    .math-tower-block.chickens-7 { background: #1f2937; }
-    .math-tower-block.chickens-8 { background: #f3f4f6; }
-    .math-tower-block.chickens-9 { background: #ec4899; }
-    .math-tower-block.chickens-10 { background: #06b6d4; }
-    .math-tower-block.chickens-11 { background: #f0a000; }
+    .math-tower-block.wolves-1 {
+      background: #f97316;
+    }
+
+    .math-tower-block.wolves-2 {
+      background: #eab308;
+    }
+
+    .math-tower-block.wolves-3 {
+      background: #22c55e;
+    }
+
+    .math-tower-block.wolves-4 {
+      background: #3b82f6;
+    }
+
+    .math-tower-block.wolves-5 {
+      background: #a855f7;
+    }
+
+    .math-tower-block.wolves-6 {
+      background: #8b5cf6;
+    }
+
+    .math-tower-block.wolves-7 {
+      background: #1f2937;
+    }
+
+    .math-tower-block.wolves-8 {
+      background: #f3f4f6;
+    }
+
+    .math-tower-block.wolves-9 {
+      background: #ec4899;
+    }
+
+    .math-tower-block.wolves-10 {
+      background: #06b6d4;
+    }
+
+    .math-tower-block.wolves-11 {
+      background: #f0a000;
+    }
+
+    .math-tower-block.chickens-0 {
+      background: #ef4444;
+    }
+
+    .math-tower-block.chickens-1 {
+      background: #f97316;
+    }
+
+    .math-tower-block.chickens-2 {
+      background: #eab308;
+    }
+
+    .math-tower-block.chickens-3 {
+      background: #22c55e;
+    }
+
+    .math-tower-block.chickens-4 {
+      background: #3b82f6;
+    }
+
+    .math-tower-block.chickens-5 {
+      background: #a855f7;
+    }
+
+    .math-tower-block.chickens-6 {
+      background: #8b5cf6;
+    }
+
+    .math-tower-block.chickens-7 {
+      background: #1f2937;
+    }
+
+    .math-tower-block.chickens-8 {
+      background: #f3f4f6;
+    }
+
+    .math-tower-block.chickens-9 {
+      background: #ec4899;
+    }
+
+    .math-tower-block.chickens-10 {
+      background: #06b6d4;
+    }
+
+    .math-tower-block.chickens-11 {
+      background: #f0a000;
+    }
 
     .math-tower-stack-center {
       position: absolute;
@@ -328,9 +408,11 @@
         opacity: 1;
         transform: scale(1) translateY(0);
       }
+
       50% {
         opacity: 1;
       }
+
       100% {
         opacity: 0;
         transform: scale(0.2) translateY(-200px);
@@ -353,9 +435,11 @@
         opacity: 1;
         transform: translateX(-50%) scale(1);
       }
+
       80% {
         opacity: 1;
       }
+
       100% {
         top: 150px;
         opacity: 0;
@@ -383,6 +467,7 @@
       0% {
         transform: translate(-50%, -50%) rotate(0deg) translateY(-120px) rotate(0deg);
       }
+
       100% {
         transform: translate(-50%, -50%) rotate(360deg) translateY(-120px) rotate(-360deg);
       }
@@ -1720,20 +1805,20 @@
         const wolvesCount = towers.wolves || 0;
         const prevWolvesCount = lastMathState.wolves || 0;
         const blockCountChanged = wolvesCount !== prevWolvesCount;
-        
+
         wolvesStack.innerHTML = "";
-        
+
         for (let i = 0; i < Math.min(12, wolvesCount); i++) {
           const block = document.createElement('div');
           block.className = `math-tower-block wolves-${i % 12}`;
           const rotation = (Math.random() - 0.5) * 6;
           block.style.transform = `rotateZ(${rotation}deg)`;
-          
+
           // Animate last added block
           if (blockCountChanged && i === wolvesCount - 1 && wolvesCount > prevWolvesCount) {
             block.style.animation = 'blockAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
           }
-          
+
           wolvesStack.appendChild(block);
         }
 
@@ -1769,20 +1854,20 @@
         const chickensCount = towers.chickens || 0;
         const prevChickensCount = lastMathState.chickens || 0;
         const blockCountChanged = chickensCount !== prevChickensCount;
-        
+
         chickensStack.innerHTML = "";
-        
+
         for (let i = 0; i < Math.min(12, chickensCount); i++) {
           const block = document.createElement('div');
           block.className = `math-tower-block chickens-${i % 12}`;
           const rotation = (Math.random() - 0.5) * 6;
           block.style.transform = `rotateZ(${rotation}deg)`;
-          
+
           // Animate last added block
           if (blockCountChanged && i === chickensCount - 1 && chickensCount > prevChickensCount) {
             block.style.animation = 'blockAppear 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)';
           }
-          
+
           chickensStack.appendChild(block);
         }
 
@@ -1819,18 +1904,18 @@
         if (eventId !== lastMathEventId) {
           lastMathEventId = eventId;
           const targetStack = ms.lastEvent.target === 'wolves' ? wolvesStack : chickensStack;
-          
+
           if (targetStack) {
             // Flash tower
             targetStack.classList.add('hit-flash');
             setTimeout(() => targetStack.classList.remove('hit-flash'), 300);
-            
+
             // Meteor falls
             const meteorEl = document.createElement('div');
             meteorEl.className = 'math-meteor-effect';
             meteorEl.textContent = '☄️';
             targetStack.appendChild(meteorEl);
-            
+
             setTimeout(() => meteorEl.remove(), 1200);
           }
         }
