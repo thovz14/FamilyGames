@@ -635,7 +635,7 @@
         <div class="tb-badge chickens">🐔 <span class="badge-score" id="topChickensScore">0</span></div>
       </div>
       <div class="gm-topbar-right">
-          <div class="tb-badge" id="topStatusBadge">🔴 Lobby</div>
+        <div class="tb-badge" id="topStatusBadge">🔴 Lobby</div>
         <button class="secondary" style="font-size:12px;padding:6px 14px;border-radius:10px;" onclick="logoutGm()">🚪
           Uitloggen</button>
       </div>
@@ -879,41 +879,60 @@
             <div id="mathTowersUI" style="display:none;">
               <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
                 <div style="font-size:16px;font-weight:800;color:#06b6d4;">🧮 Math Towers</div>
-                <div style="font-size:9px;font-weight:800;padding:4px 8px;border-radius:20px;background:rgba(6,182,212,.15);color:#67e8f9;text-transform:uppercase;">Live</div>
+                <div
+                  style="font-size:9px;font-weight:800;padding:4px 8px;border-radius:20px;background:rgba(6,182,212,.15);color:#67e8f9;text-transform:uppercase;">
+                  Live</div>
               </div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
-                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
+                <div
+                  style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
                   <div style="font-size:11px;color:var(--text-muted);font-weight:800;">🐺 Wolven</div>
-                  <div id="mtGmWolves" style="font-family:'Fredoka One';font-size:34px;color:var(--brand-primary);">0</div>
+                  <div id="mtGmWolves" style="font-family:'Fredoka One';font-size:34px;color:var(--brand-primary);">0
+                  </div>
                   <div id="mtGmWolvesMeta" style="font-size:10px;color:var(--text-muted);font-weight:700;">—</div>
                 </div>
-                <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
+                <div
+                  style="background:var(--bg-surface);border:1px solid var(--border);border-radius:12px;padding:12px;text-align:center;">
                   <div style="font-size:11px;color:var(--text-muted);font-weight:800;">🐔 Kippen</div>
-                  <div id="mtGmChickens" style="font-family:'Fredoka One';font-size:34px;color:var(--brand-secondary);">0</div>
+                  <div id="mtGmChickens" style="font-family:'Fredoka One';font-size:34px;color:var(--brand-secondary);">
+                    0</div>
                   <div id="mtGmChickensMeta" style="font-size:10px;color:var(--text-muted);font-weight:700;">—</div>
                 </div>
               </div>
               <div class="section-divider">Torencontrole</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px;">
-                <button class="secondary" style="font-size:11px;padding:10px 0;" onclick="gmAdjustMathTower('wolves',1)">🐺 +1</button>
-                <button class="secondary" style="font-size:11px;padding:10px 0;" onclick="gmAdjustMathTower('chickens',1)">🐔 +1</button>
-                <button class="warning" style="font-size:11px;padding:10px 0;" onclick="gmAdjustMathTower('wolves',-1)">🐺 -1</button>
-                <button class="warning" style="font-size:11px;padding:10px 0;" onclick="gmAdjustMathTower('chickens',-1)">🐔 -1</button>
+                <button class="secondary" style="font-size:11px;padding:10px 0;"
+                  onclick="gmAdjustMathTower('wolves',1)">🐺 +1</button>
+                <button class="secondary" style="font-size:11px;padding:10px 0;"
+                  onclick="gmAdjustMathTower('chickens',1)">🐔 +1</button>
+                <button class="warning" style="font-size:11px;padding:10px 0;"
+                  onclick="gmAdjustMathTower('wolves',-1)">🐺 -1</button>
+                <button class="warning" style="font-size:11px;padding:10px 0;"
+                  onclick="gmAdjustMathTower('chickens',-1)">🐔 -1</button>
               </div>
               <div class="section-divider">Sabotage als GM</div>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0 12px;">
-                <button class="danger" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('wolves','meteor')">🐺 ☄️</button>
-                <button class="danger" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('chickens','meteor')">🐔 ☄️</button>
-                <button class="warning" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('wolves','sandstorm')">🐺 🌪️</button>
-                <button class="warning" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('chickens','sandstorm')">🐔 🌪️</button>
-                <button class="success" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('wolves','shield')">🐺 🧱</button>
-                <button class="success" style="font-size:11px;padding:10px 0;" onclick="gmMathSabotage('chickens','shield')">🐔 🧱</button>
+                <button class="danger" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('wolves','meteor')">🐺 ☄️</button>
+                <button class="danger" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('chickens','meteor')">🐔 ☄️</button>
+                <button class="warning" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('wolves','sandstorm')">🐺 🌪️</button>
+                <button class="warning" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('chickens','sandstorm')">🐔 🌪️</button>
+                <button class="success" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('wolves','shield')">🐺 🧱</button>
+                <button class="success" style="font-size:11px;padding:10px 0;"
+                  onclick="gmMathSabotage('chickens','shield')">🐔 🧱</button>
               </div>
               <div class="section-divider">Finish</div>
               <div style="display:grid;grid-template-columns:1fr;gap:8px;margin-top:8px;">
-                <button class="primary full" style="font-size:11px;padding:10px 0;" onclick="gmAwardMathWinner()">🏆 Geef winnaar punten</button>
-                <button class="secondary full" style="font-size:11px;padding:10px 0;" onclick="gmResetMathTowers()">🔄 Reset torens</button>
-                <button class="danger full" style="font-size:11px;padding:10px 0;" onclick="stopMinigame()">🛑 Stop Spel</button>
+                <button class="primary full" style="font-size:11px;padding:10px 0;" onclick="gmAwardMathWinner()">🏆
+                  Geef winnaar punten</button>
+                <button class="secondary full" style="font-size:11px;padding:10px 0;" onclick="gmResetMathTowers()">🔄
+                  Reset torens</button>
+                <button class="danger full" style="font-size:11px;padding:10px 0;" onclick="stopMinigame()">🛑 Stop
+                  Spel</button>
               </div>
             </div>
 
@@ -953,9 +972,7 @@
     </div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
   <script src="script.js?v=1.2"></script>
 
   <script>
@@ -1020,15 +1037,15 @@
     }
 
     // Thomas krijgt automatisch toegang via Firebase; anders tonen we de GM-popup.
-    firebase.auth().onAuthStateChanged(async (user) => {
+    pb.authStore.onChange(async (token, user) => {
       if (user && user.email === "thomas@vzunderd.nl") {
         sessionStorage.setItem("gmActive", "true");
-        sessionStorage.setItem("gmName", user.displayName || user.email);
+        sessionStorage.setItem("gmName", user.name || user.email);
         await activateGameMaster();
       } else {
         checkStoredGmLogin();
       }
-    });
+    }, true);
 
     function logoutGm() {
       if (confirm("Uitloggen als Game Master?")) {
@@ -1093,13 +1110,12 @@
       if (mg.id === "PhotoChallenge") {
         const shuffled = [...PHOTO_CHALLENGE_ITEMS].sort(() => Math.random() - 0.5);
         updates.photoChallengeItems = shuffled.slice(0, 10);
-        const snap = await db.collection("players").get();
-        const batch = db.batch();
-        snap.forEach(doc => batch.update(doc.ref, {
+        const players = await getPlayers();
+        const promises = players.map(p => pb.collection("players").update(p.id, {
           photoChallengeCheckedArray: null,
           photoChallengeCheckedCount: 0
         }));
-        await batch.commit();
+        await Promise.all(promises);
       }
       await updateGameState(updates);
       gmTimerStarted = true;
@@ -1128,10 +1144,9 @@
 
     async function startTimeGuesserChallenge() {
       // Reset all player results first
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, { timeResult: null, timeScore: 0 }));
-      await batch.commit();
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, { timeResult: null, timeScore: 0 }));
+      await Promise.all(promises);
 
       // Use timestamp-based countdown so tab switches don't break it
       const startAt = Date.now();
@@ -1199,13 +1214,12 @@
       const mg = MINIGAMES.find(m => m.id === "EmojiMystery");
       if (!mg) return;
 
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, {
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, {
         emojiGuess: null,
         LastAction: new Date().toISOString()
       }));
-      await batch.commit();
+      await Promise.all(promises);
 
       const shuffled = [...EMOJI_MYSTERIES].sort(() => Math.random() - 0.5);
       const selectedMovies = shuffled.slice(0, 10);
@@ -1241,13 +1255,12 @@
     async function startMathTowersGame() {
       const mg = MINIGAMES.find(m => m.id === "MathTowers");
       if (!mg) return;
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, {
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, {
         mathWrongUntil: 0,
         LastAction: new Date().toISOString()
       }));
-      await batch.commit();
+      await Promise.all(promises);
 
       const timerEnd = Date.now() + mg.duration * 1000;
       await updateGameState({

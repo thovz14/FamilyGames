@@ -596,9 +596,7 @@
 
 
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
   <script src="script.js?v=1.2"></script>
 
   <script>
@@ -667,11 +665,11 @@
         roomCodeValidated = true;
 
         // Haal icon op uit Firestore
-        const pSnap = await db.collection("players").doc(playerDocId(myName)).get();
-        if (pSnap.exists) {
-          selectedIcon = pSnap.data().icon;
+        try {
+          const pSnap = await pb.collection("players").getOne(playerDocId(myName));
+          selectedIcon = pSnap.icon;
           renderAvatarToElement(document.getElementById("pAvatar"), selectedIcon);
-        }
+        } catch(e) {}
 
         document.getElementById("roomCodeScreen").classList.add("hidden");
         document.getElementById("joinForm").classList.add("hidden");
@@ -694,7 +692,7 @@
       appendUploadOption();
 
       // Fetch and prepend user's Wonder ID profile picture if authenticated
-      firebase.auth().onAuthStateChanged(async (user) => {
+      pb.authStore.onChange(async (token, user) => {
         if (user) {
           // Show the GM FAB only if logged in user is thomas@vzunderd.nl
           const gmFab = document.getElementById("gmFab");
@@ -707,13 +705,10 @@
           }
 
           try {
-            const userDoc = await db.collection("users").doc(user.uid).get();
-            if (userDoc.exists) {
-              const userData = userDoc.data();
-              const wonderIdPic = userData.profilePicSelection;
-              if (wonderIdPic) {
-                renderWonderIdOption(wonderIdPic);
-              }
+            const userData = await pb.collection("users").getOne(user.id);
+            const wonderIdPic = userData.profilePicSelection;
+            if (wonderIdPic) {
+              renderWonderIdOption(wonderIdPic);
             }
           } catch (err) {
             console.error("Failed to load Wonder ID profile:", err);
@@ -722,7 +717,7 @@
           const gmFab = document.getElementById("gmFab");
           if (gmFab) gmFab.style.display = "none";
         }
-      });
+      }, true);
 
       listenToGameState((state) => {
         currentGameState = state;
@@ -868,10 +863,10 @@
             const dataURL = canvas.toDataURL('image/jpeg', 0.8);
 
             // 1. Update Wonder ID user document
-            const user = firebase.auth().currentUser;
+            const user = pb.authStore.model;
             if (user) {
               try {
-                await db.collection("users").doc(user.uid).set({ profilePicSelection: dataURL }, { merge: true });
+                await pb.collection("users").update(user.id, { profilePicSelection: dataURL });
               } catch (err) {
                 console.error("Failed to update Wonder ID doc:", err);
               }
@@ -887,7 +882,7 @@
             // 3. Update player document instantly if already in game
             if (currentPlayerName) {
               try {
-                await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+                await pb.collection("players").update(playerDocId(currentPlayerName), {
                   icon: dataURL
                 });
                 selectedIcon = dataURL;
@@ -1034,8 +1029,8 @@
             psTitle.textContent = "🗳️ Wie is de Imposter?";
             
             // Check if already voted
-            db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
-              const data = doc.data() || {};
+            pb.collection("players").getOne(playerDocId(currentPlayerName)).then(doc => {
+              const data = doc || {};
               if (data.vote) {
                 psText.textContent = "Je hebt gestemd! Wacht op de resultaten...";
                 document.getElementById("imposterVote").classList.add("hidden");
@@ -1077,8 +1072,8 @@
           document.getElementById("tgCountdown").classList.add("hidden");
           
           // Check if we already clicked
-          db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
-            const res = doc.data().timeResult;
+          pb.collection("players").getOne(playerDocId(currentPlayerName)).then(doc => {
+            const res = doc.timeResult;
             if (res) {
               document.getElementById("tgActive").classList.add("hidden");
               document.getElementById("tgResult").classList.remove("hidden");
@@ -1106,9 +1101,9 @@
             });
           }
           // Restore checked state from Firestore
-          db.collection("players").doc(playerDocId(currentPlayerName)).get().then(doc => {
-            if (doc.exists) {
-              const arr = doc.data().photoChallengeCheckedArray || Array(items.length).fill(false);
+          pb.collection("players").getOne(playerDocId(currentPlayerName)).then(doc => {
+            if (doc) {
+              const arr = doc.photoChallengeCheckedArray || Array(items.length).fill(false);
               const boxes = pcList.querySelectorAll("input[type='checkbox']");
               let count = 0;
               boxes.forEach((cb, idx) => { cb.checked = arr[idx] || false; if (arr[idx]) count++; });
@@ -1192,9 +1187,9 @@
         psText.textContent = isExp ? (state.message || "") : "Druk op de knop als je klaar bent!";
         
         readyWrap.classList.remove("hidden");
-        db.collection("players").doc(playerDocId(currentPlayerName)).get().then((doc) => {
-          if (!doc.exists) return;
-          const r = doc.data().ready;
+        pb.collection("players").getOne(playerDocId(currentPlayerName)).then((doc) => {
+          if (!doc) return;
+          const r = doc.ready;
           document.getElementById("readyBtn").textContent = r ? "⏳ Wachten..." : "✅ Ik ben Klaar!";
           document.getElementById("readyBtn").className = r ? "warning" : "success";
         });
@@ -1234,9 +1229,9 @@
 
     async function toggleReady() {
       if (!currentPlayerName) return;
-      const snap = await db.collection("players").doc(playerDocId(currentPlayerName)).get();
-      if (!snap.exists) return;
-      const nowReady = !snap.data().ready;
+      const snap = await pb.collection("players").getOne(playerDocId(currentPlayerName));
+      if (!snap) return;
+      const nowReady = !snap.ready;
       await setPlayerReady(currentPlayerName, nowReady);
       document.getElementById("readyBtn").textContent = nowReady ? "⏳ Wachten..." : "✅ Ik ben Klaar!";
       document.getElementById("readyBtn").className = nowReady ? "warning" : "success";
@@ -1301,7 +1296,7 @@
       document.getElementById("tgActive").classList.add("hidden");
       document.getElementById("tgResult").classList.remove("hidden");
       
-      await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+      await pb.collection("players").update(playerDocId(currentPlayerName), {
         timeResult: elapsed,
         timeScore: score
       });
@@ -1343,7 +1338,7 @@
       }
       
       try {
-        await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+        await pb.collection("players").update(playerDocId(currentPlayerName), {
           photoChallengeCheckedCount: checkedCount,
           photoChallengeCheckedArray: arr,
           LastAction: new Date().toISOString()
@@ -1383,7 +1378,7 @@
       const ms = currentGameState.minigameState || {};
       
       // Save their guess to their player doc
-      await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+      await pb.collection("players").update(playerDocId(currentPlayerName), {
         emojiGuess: input
       });
       
@@ -1546,19 +1541,17 @@
         card.classList.remove("math-wrong-flash");
         void card.offsetWidth;
         card.classList.add("math-wrong-flash");
-        await db.collection("players").doc(playerDocId(currentPlayerName)).update({
+        await pb.collection("players").update(playerDocId(currentPlayerName), {
           mathWrongUntil: mathLockedUntil,
           LastAction: new Date().toISOString()
         }).catch(() => {});
-        await db.runTransaction(async transaction => {
-          const ref = db.collection("game_state").doc("current");
-          const snap = await transaction.get(ref);
-          const state = snap.data() || {};
+        try {
+          const state = await getGameState();
           const ms = state.minigameState || {};
           const wrongAnswers = { wolves: 0, chickens: 0, ...(ms.wrongAnswers || {}) };
           wrongAnswers[team] = (wrongAnswers[team] || 0) + 1;
-          transaction.update(ref, { "minigameState.wrongAnswers": wrongAnswers });
-        });
+          await updateGameState({ "minigameState.wrongAnswers": wrongAnswers });
+        } catch(e) {}
         renderMathTowersPhone(currentGameState);
         return;
       }
@@ -1566,22 +1559,21 @@
       feedback.textContent = "Goed! ✨ Blok onderweg naar de TV!";
       card.classList.add('math-correct-flash');
       setTimeout(() => card.classList.remove('math-correct-flash'), 500);
-      await db.runTransaction(async transaction => {
-        const ref = db.collection("game_state").doc("current");
-        const snap = await transaction.get(ref);
-        const state = snap.data() || {};
+      try {
+        const state = await getGameState();
         const ms = state.minigameState || {};
-        if (ms.type !== "MathTowers") return;
-        const towers = { wolves: 0, chickens: 0, ...(ms.towers || {}) };
-        const correctAnswers = { wolves: 0, chickens: 0, ...(ms.correctAnswers || {}) };
-        towers[team] = (towers[team] || 0) + 1;
-        correctAnswers[team] = (correctAnswers[team] || 0) + 1;
-        transaction.update(ref, {
-          "minigameState.towers": towers,
-          "minigameState.correctAnswers": correctAnswers,
-          "minigameState.lastEvent": { id: `${Date.now()}-${currentPlayerName}`, type: "correct", team, player: currentPlayerName }
-        });
-      });
+        if (ms.type === "MathTowers") {
+          const towers = { wolves: 0, chickens: 0, ...(ms.towers || {}) };
+          const correctAnswers = { wolves: 0, chickens: 0, ...(ms.correctAnswers || {}) };
+          towers[team] = (towers[team] || 0) + 1;
+          correctAnswers[team] = (correctAnswers[team] || 0) + 1;
+          await updateGameState({
+            "minigameState.towers": towers,
+            "minigameState.correctAnswers": correctAnswers,
+            "minigameState.lastEvent": { id: `${Date.now()}-${currentPlayerName}`, type: "correct", team, player: currentPlayerName }
+          });
+        }
+      } catch(e) {}
       // Slight delay for visual feedback
       setTimeout(() => {
         mathCurrentQuestion = makeMathQuestion();
@@ -1605,10 +1597,8 @@
       const feedback = document.getElementById("mtFeedback");
       const btnEl = document.getElementById(`mtMeteorBtn mtSandstormBtn mtShieldBtn`.includes(kind) ? `mt${kind.charAt(0).toUpperCase() + kind.slice(1)}Btn` : "mtMeteorBtn");
 
-      await db.runTransaction(async transaction => {
-        const ref = db.collection("game_state").doc("current");
-        const snap = await transaction.get(ref);
-        const state = snap.data() || {};
+      try {
+        const state = await getGameState();
         const ms = state.minigameState || {};
         if (ms.type !== "MathTowers") return;
         const towers = { wolves: 0, chickens: 0, ...(ms.towers || {}) };
@@ -1648,13 +1638,13 @@
         feedback.textContent = resultText;
         feedback.style.color = "var(--accent)";
         
-        transaction.update(ref, {
+        await updateGameState({
           "minigameState.towers": towers,
           "minigameState.shields": shields,
           "minigameState.sandstormUntil": sandstormUntil,
           "minigameState.lastEvent": event
         });
-      });
+      } catch(e) {}
       
       mathLockedUntil = Date.now() + 1500;
       

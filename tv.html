@@ -1487,9 +1487,7 @@
     <div id="adminModal"></div>
   </div>
 
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pocketbase@0.22.0/dist/pocketbase.umd.js"></script>
   <script src="script.js?v=1.2"></script>
 
   <script>
@@ -2428,7 +2426,7 @@
 
     async function assignTeam(playerName, team, btn) {
       try {
-        await db.collection("players").doc(playerDocId(playerName)).update({
+        await pb.collection("players").update(playerDocId(playerName), {
           team: team,
           LastAction: new Date().toISOString()
         });
@@ -2487,17 +2485,16 @@
       if (!mg) return;
 
       // Reset all ready flags
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => {
+      const players = await getPlayers();
+      const updatesPromises = players.map(p => {
         const updates = { ready: false };
         if (mg.id === "PhotoChallenge") {
           updates.photoChallengeCheckedArray = null;
           updates.photoChallengeCheckedCount = 0;
         }
-        batch.update(doc.ref, updates);
+        return pb.collection("players").update(p.id, updates);
       });
-      await batch.commit();
+      await Promise.all(updatesPromises);
 
       // Go to ready check
       const updates = {

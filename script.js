@@ -1,19 +1,14 @@
-const firebaseConfig = {
-  apiKey: "AIzaSyBRpbQS2jN_Zp7XzKWYkM0Png4K4yzA9oc",
-  authDomain: "familygames-3d0d2.firebaseapp.com",
-  databaseURL: "https://familygames-3d0d2-default-rtdb.firebaseio.com",
-  projectId: "familygames-3d0d2",
-  storageBucket: "familygames-3d0d2.firebasestorage.app",
-  messagingSenderId: "326491635543",
-  appId: "1:326491635543:web:1d979ed6ed03351cc20812",
-  measurementId: "G-Q3FG5R94GP"
-};
+// script.js – Wonder Games shared game logic
+// Auth is handled by js/auth.js which creates window.pb.
+// This file only creates pb if it wasn't already initialised
+// (for pages that don't load auth.js, e.g. tv.html).
 
-console.log("script.js: Loading Firebase...");
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-console.log("script.js: Firebase initialized.");
+if (!window.pb) {
+  window.pb = new PocketBase('https://db.wonderdev.nl/');
+}
+var pb = window.pb; // var allows co-existence with auth.js's const pb
+
+console.log('script.js: PocketBase ready.');
 
 const IMPOSTER_WORDS = [
   "Boerenkool", "Pizza", "Hagelslag", "Watermeloen", "Pannenkoek", "Snert", "Kapsalon", "Frikandel",
@@ -79,80 +74,22 @@ const EMOJI_MYSTERIES = [
 ];
 
 
-async function signInWithGoogle() {
-  console.log("script.js: signInWithGoogle called");
-  try {
-    const provider = new firebase.auth.GoogleAuthProvider();
-    const result = await auth.signInWithPopup(provider);
-
-    if (result.additionalUserInfo.isNewUser) {
-      console.warn("script.js: New user detected, deleting...");
-      await result.user.delete();
-      await auth.signOut();
-      throw new Error("Geen account gevonden. Je kunt geen nieuw account aanmaken met Google.");
-    }
-
-    return true;
-  } catch (error) {
-    console.error("script.js: Google Login Error:", error);
-    throw error;
-  }
+// Auth state kept in sync with PocketBase (if auth.js is not loaded)
+if (!window.isUserLoggedIn) {
+  window.isUserLoggedIn = function () { return pb.authStore.isValid; };
 }
-window.signInWithGoogle = signInWithGoogle; // Expliciet aan window toevoegen
-
-auth.onAuthStateChanged((user) => {
-  if (user) {
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", user.email);
-
-    // Probeer eerst de displayName (voor Google accounts)
-    // Als die er niet is, gebruik het deel voor de @
-    let name = "";
-    if (user.displayName) {
-      name = user.displayName.split(' ')[0];
-    } else {
-      name = user.email.split('@')[0];
-    }
-    localStorage.setItem("displayName", name);
-  } else {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("displayName");
-  }
-});
-
-// signInWithGoogle is verplaatst naar boven
-
-async function verifyLogin(username, password) {
-  try {
-    const result = await auth.signInWithEmailAndPassword(username, password);
-    localStorage.setItem("isLoggedIn", "true");
-    localStorage.setItem("currentUser", result.user.email || username);
-    return true;
-  } catch (error) {
-    return false;
-  }
+if (!window.getDisplayName) {
+  window.getDisplayName = function () {
+    const m = pb.authStore.model;
+    if (!m) return 'Gast';
+    return m.username || m.name || m.email?.split('@')[0] || 'Gast';
+  };
 }
-
-function isUserLoggedIn() {
-  return localStorage.getItem("isLoggedIn") === "true";
-}
-
-function getCurrentUser() {
-  return localStorage.getItem("currentUser");
-}
-
-function getDisplayName() {
-  return localStorage.getItem("displayName") || "Gast";
-}
-
-function logoutUser() {
-  auth.signOut().finally(() => {
-    localStorage.removeItem("isLoggedIn");
-    localStorage.removeItem("currentUser");
-    localStorage.removeItem("displayName");
-    window.location.href = "index.html";
-  });
+if (!window.logoutUser) {
+  window.logoutUser = function () {
+    pb.authStore.clear();
+    window.location.href = 'index.html';
+  };
 }
 
 function generateRoomCode() {
@@ -179,15 +116,18 @@ async function validateRoomCode(inputCode) {
 async function checkPlayerExists(name) {
   try {
     const id = playerDocId(name);
-    const snap = await db.collection("players").doc(id).get();
-    return snap.exists;
+    await pb.collection("players").getOne(id);
+    return true;
   } catch (e) { return false; }
 }
 
 function playerDocId(name) {
-  if (!name) return `player-${Date.now()}`;
-  const id = name.trim().toLowerCase().replace(/[^a-z0-9_-]/g, "_");
-  return id || `player-${Date.now()}`;
+  if (!name) return `player${Date.now()}`.substring(0,15);
+  // Pocketbase IDs must be exactly 15 chars alphanumeric
+  let id = name.trim().toLowerCase().replace(/[^a-z0-9]/g, "");
+  while(id.length < 15) id += "x";
+  if(id.length > 15) id = id.substring(0, 15);
+  return id;
 }
 
 function showError(message) {
@@ -203,61 +143,61 @@ function showError(message) {
 
 async function ensureGameState() {
   try {
-    const ref = db.collection("game_state").doc("current");
-    const snap = await ref.get();
-    if (!snap.exists) {
-      const initial = {
-        status: "lobby",
-        isLocked: false,
-        page: 1,
-        message: "",
-        gamePhase: "lobby",
-        activeGameId: "",
-        activeGameName: "",
-        activeGameDescription: "",
-        activeGameDuration: null,
-        timerEnd: null,
-        showBetween: false,
-        roomCode: "",
-        teamScores: { wolves: 0, chickens: 0 },
-        isPaused: false,
-        pausedTimeRemaining: 0
-      };
-      await ref.set(initial);
-      return initial;
+    const initial = {
+      id: "currentstate123", // exactly 15 chars
+      status: "lobby",
+      isLocked: false,
+      page: 1,
+      message: "",
+      gamePhase: "lobby",
+      activeGameId: "",
+      activeGameName: "",
+      activeGameDescription: "",
+      activeGameDuration: null,
+      timerEnd: null,
+      showBetween: false,
+      roomCode: "",
+      teamScores: { wolves: 0, chickens: 0 },
+      isPaused: false,
+      pausedTimeRemaining: 0
+    };
+    try {
+      await pb.collection("game_state").getOne("currentstate123");
+    } catch (e) {
+      if (e.status === 404) {
+        await pb.collection("game_state").create(initial);
+      }
     }
-    return snap.data();
+    return initial;
   } catch (error) {
     console.error("ensureGameState error:", error);
-    showError("Firestore error: " + error.message);
+    showError("PocketBase error: " + error.message);
     return null;
   }
 }
 
 async function getGameState() {
   try {
-    const snap = await db.collection("game_state").doc("current").get();
-    if (!snap.exists) return await ensureGameState();
-    return snap.data();
+    const doc = await pb.collection("game_state").getOne("currentstate123");
+    return doc;
   } catch (error) {
+    if (error.status === 404) return await ensureGameState();
     console.error("getGameState error:", error);
-    showError("Firestore error: " + error.message);
+    showError("PocketBase error: " + error.message);
     return null;
   }
 }
 
 async function updateGameState(updates) {
   try {
-    // We gebruiken .update() in plaats van .set(..., {merge:true}) omdat .update() 
-    // correct omgaat met "dot-notation" voor geneste velden (bijv. "minigameState.status")
-    await db.collection("game_state").doc("current").update(updates);
+    await pb.collection("game_state").update("currentstate123", updates);
   } catch (error) {
-    // Als de document nog niet bestaat, gebruik set
-    if (error.code === 'not-found') {
-      await db.collection("game_state").doc("current").set(updates, { merge: true });
+    if (error.status === 404) {
+      const initial = await ensureGameState();
+      await pb.collection("game_state").update("currentstate123", updates);
     } else {
       console.error("updateGameState error:", error);
-      showError("Firestore error: " + error.message);
+      showError("PocketBase error: " + error.message);
     }
   }
 }
@@ -265,21 +205,17 @@ async function updateGameState(updates) {
 async function addPlayer(name, icon) {
   try {
     const id = playerDocId(name);
-
-    // Bepaal automatisch het team op basis van het huidige aantal spelers
     const allPlayers = await getPlayers();
     const wolvesCount = allPlayers.filter(p => p.team === "wolves").length;
     const chickensCount = allPlayers.filter(p => p.team === "chickens").length;
-
-    // Als wolves <= chickens, voeg toe aan wolves. Anders aan chickens.
     const assignedTeam = wolvesCount <= chickensCount ? "wolves" : "chickens";
-
     const randomMission = SECRET_MISSIONS[Math.floor(Math.random() * SECRET_MISSIONS.length)];
 
-    await db.collection("players").doc(id).set({
+    await pb.collection("players").create({
+      id: id,
       name: name,
       icon: icon,
-      email: auth.currentUser ? auth.currentUser.email : "gast@familie.nl",
+      email: pb.authStore.model ? pb.authStore.model.email : "gast@familie.nl",
       score: 0,
       team: assignedTeam,
       ready: false,
@@ -287,60 +223,80 @@ async function addPlayer(name, icon) {
       LastAction: new Date().toISOString()
     });
   } catch (error) {
-    console.error("addPlayer error:", error);
-    showError("Firestore error: " + error.message);
+    if (error.status === 400) {
+        // Record exists or invalid ID? Let's just update if it exists
+        try {
+            const id = playerDocId(name);
+            await pb.collection("players").update(id, { LastAction: new Date().toISOString() });
+        } catch(e){}
+    } else {
+        console.error("addPlayer error:", error);
+        showError("PocketBase error: " + error.message);
+    }
   }
 }
 
 async function getPlayers() {
   try {
-    const snap = await db.collection("players").get();
-    const players = [];
-    snap.forEach((doc) => players.push(doc.data()));
-    return players;
+    return await pb.collection("players").getFullList();
   } catch (error) {
     console.error("getPlayers error:", error);
     return [];
   }
 }
 
+let playersSubscription = null;
 function listenToPlayers(callback) {
-  return db.collection("players").onSnapshot(
-    (snap) => {
-      const players = [];
-      snap.forEach((doc) => players.push(doc.data()));
-      callback(players);
-    },
-    (error) => {
-      console.error("listenToPlayers error:", error);
-      showError("Firestore error: " + error.message);
+  // First, fetch current state
+  getPlayers().then(callback);
+
+  // Then subscribe to changes
+  pb.collection("players").subscribe('*', async function (e) {
+    // PocketBase real-time events send only the changed record, 
+    // so we re-fetch the full list to give the callback what it expects
+    const allPlayers = await getPlayers();
+    callback(allPlayers);
+  }).then(unsub => {
+    playersSubscription = unsub;
+  });
+
+  return () => {
+    if (playersSubscription) {
+      pb.collection("players").unsubscribe('*');
+      playersSubscription = null;
     }
-  );
+  };
 }
 
+let gameStateSubscription = null;
 function listenToGameState(callback) {
-  return db.collection("game_state").doc("current").onSnapshot(
-    (doc) => {
-      if (doc.exists) callback(doc.data());
-    },
-    (error) => {
-      console.error("listenToGameState error:", error);
-      showError("Firestore error: " + error.message);
+  // First, fetch current state
+  getGameState().then(doc => { if (doc) callback(doc); });
+
+  // Then subscribe to changes
+  pb.collection("game_state").subscribe('currentstate123', function (e) {
+    callback(e.record);
+  }).then(unsub => {
+    gameStateSubscription = unsub;
+  });
+
+  return () => {
+    if (gameStateSubscription) {
+      pb.collection("game_state").unsubscribe('currentstate123');
+      gameStateSubscription = null;
     }
-  );
+  };
 }
 
 async function updatePlayerScore(playerName, scoreChange) {
   try {
-    const ref = db.collection("players").doc(playerDocId(playerName));
-    const snap = await ref.get();
-    if (snap.exists) {
-      const current = snap.data().score || 0;
-      await ref.update({
-        score: current + scoreChange,
-        LastAction: new Date().toISOString()
-      });
-    }
+    const id = playerDocId(playerName);
+    const snap = await pb.collection("players").getOne(id);
+    const current = snap.score || 0;
+    await pb.collection("players").update(id, {
+      score: current + scoreChange,
+      LastAction: new Date().toISOString()
+    });
   } catch (error) {
     console.error("updatePlayerScore error:", error);
   }
@@ -348,8 +304,8 @@ async function updatePlayerScore(playerName, scoreChange) {
 
 async function setPlayerScore(playerName, newScore) {
   try {
-    const ref = db.collection("players").doc(playerDocId(playerName));
-    await ref.update({
+    const id = playerDocId(playerName);
+    await pb.collection("players").update(id, {
       score: newScore,
       LastAction: new Date().toISOString()
     });
@@ -360,7 +316,8 @@ async function setPlayerScore(playerName, newScore) {
 
 async function removePlayer(playerName) {
   try {
-    await db.collection("players").doc(playerDocId(playerName)).delete();
+    const id = playerDocId(playerName);
+    await pb.collection("players").delete(id);
   } catch (error) {
     console.error("removePlayer error:", error);
   }
@@ -368,7 +325,8 @@ async function removePlayer(playerName) {
 
 async function setPlayerReady(playerName, ready) {
   try {
-    await db.collection("players").doc(playerDocId(playerName)).update({
+    const id = playerDocId(playerName);
+    await pb.collection("players").update(id, {
       ready: ready,
       LastAction: new Date().toISOString()
     });
@@ -387,10 +345,10 @@ async function setLocked(lock) {
 
 async function clearAllPlayers() {
   try {
-    const snap = await db.collection("players").get();
-    const batch = db.batch();
-    snap.forEach((doc) => batch.delete(doc.ref));
-    await batch.commit();
+    const players = await getPlayers();
+    for (let p of players) {
+      await pb.collection("players").delete(p.id);
+    }
   } catch (error) {
     console.error("clearAllPlayers error:", error);
   }
@@ -398,12 +356,10 @@ async function clearAllPlayers() {
 
 async function resetAllScores() {
   try {
-    const snap = await db.collection("players").get();
-    const batch = db.batch();
-    snap.forEach((doc) => {
-      batch.update(doc.ref, { score: 0, LastAction: new Date().toISOString() });
-    });
-    await batch.commit();
+    const players = await getPlayers();
+    for (let p of players) {
+      await pb.collection("players").update(p.id, { score: 0, LastAction: new Date().toISOString() });
+    }
   } catch (error) {
     console.error("resetAllScores error:", error);
   }
@@ -411,7 +367,8 @@ async function resetAllScores() {
 
 async function updatePlayerPhotoSprintCount(playerName, count) {
   try {
-    await db.collection("players").doc(playerDocId(playerName)).update({
+    const id = playerDocId(playerName);
+    await pb.collection("players").update(id, {
       photoSprintCheckedCount: count,
       LastAction: new Date().toISOString()
     });
@@ -422,7 +379,8 @@ async function updatePlayerPhotoSprintCount(playerName, count) {
 
 async function updatePlayerPhotoChallengeCount(playerName, count, checkedArray) {
   try {
-    await db.collection("players").doc(playerDocId(playerName)).update({
+    const id = playerDocId(playerName);
+    await pb.collection("players").update(id, {
       photoChallengeCheckedCount: count,
       photoChallengeCheckedArray: checkedArray,
       LastAction: new Date().toISOString()
@@ -434,7 +392,8 @@ async function updatePlayerPhotoChallengeCount(playerName, count, checkedArray) 
 
 async function submitPlayerVote(playerName, vote) {
   try {
-    await db.collection("players").doc(playerDocId(playerName)).update({
+    const id = playerDocId(playerName);
+    await pb.collection("players").update(id, {
       vote: vote,
       LastAction: new Date().toISOString()
     });
@@ -445,12 +404,10 @@ async function submitPlayerVote(playerName, vote) {
 
 async function clearAllVotes() {
   try {
-    const snap = await db.collection("players").get();
-    const batch = db.batch();
-    snap.forEach((doc) => {
-      batch.update(doc.ref, { vote: null });
-    });
-    await batch.commit();
+    const players = await getPlayers();
+    for (let p of players) {
+      await pb.collection("players").update(p.id, { vote: null });
+    }
   } catch (error) {
     console.error("clearAllVotes error:", error);
   }
