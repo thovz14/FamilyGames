@@ -1550,7 +1550,7 @@
           const ms = state.minigameState || {};
           const wrongAnswers = { wolves: 0, chickens: 0, ...(ms.wrongAnswers || {}) };
           wrongAnswers[team] = (wrongAnswers[team] || 0) + 1;
-          await updateGameState({ "minigameState.wrongAnswers": wrongAnswers });
+          await updateGameState({ minigameState: { ...ms, wrongAnswers } });
         } catch(e) {}
         renderMathTowersPhone(currentGameState);
         return;
@@ -1568,9 +1568,12 @@
           towers[team] = (towers[team] || 0) + 1;
           correctAnswers[team] = (correctAnswers[team] || 0) + 1;
           await updateGameState({
-            "minigameState.towers": towers,
-            "minigameState.correctAnswers": correctAnswers,
-            "minigameState.lastEvent": { id: `${Date.now()}-${currentPlayerName}`, type: "correct", team, player: currentPlayerName }
+            minigameState: {
+              ...ms,
+              towers: towers,
+              correctAnswers: correctAnswers,
+              lastEvent: { id: `${Date.now()}-${currentPlayerName}`, type: "correct", team, player: currentPlayerName }
+            }
           });
         }
       } catch(e) {}
@@ -1639,10 +1642,13 @@
         feedback.style.color = "var(--accent)";
         
         await updateGameState({
-          "minigameState.towers": towers,
-          "minigameState.shields": shields,
-          "minigameState.sandstormUntil": sandstormUntil,
-          "minigameState.lastEvent": event
+          minigameState: {
+            ...ms,
+            towers: towers,
+            shields: shields,
+            sandstormUntil: sandstormUntil,
+            lastEvent: event
+          }
         });
       } catch(e) {}
       

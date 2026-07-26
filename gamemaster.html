@@ -1335,7 +1335,7 @@
         teamScores: ts,
         gamePhase: "ended",
         message: `De Imposter was ${imposterName}!`,
-        "minigameState.status": "ended"
+        minigameState: { ...ms, status: "ended" }
       });
     }
 
@@ -1423,8 +1423,11 @@
       const towers = { wolves: 0, chickens: 0, ...(ms.towers || {}) };
       towers[team] = Math.max(0, (towers[team] || 0) + delta);
       await updateGameState({
-        "minigameState.towers": towers,
-        "minigameState.lastEvent": { id: `${Date.now()}-gm-adjust-${team}`, type: "correct", team, player: "GM" }
+        minigameState: {
+          ...ms,
+          towers: towers,
+          lastEvent: { id: `${Date.now()}-gm-adjust-${team}`, type: "correct", team, player: "GM" }
+        }
       });
     }
 
@@ -1454,22 +1457,29 @@
       }
 
       await updateGameState({
-        "minigameState.towers": towers,
-        "minigameState.shields": shields,
-        "minigameState.sandstormUntil": sandstormUntil,
-        "minigameState.lastEvent": event
+        minigameState: {
+          ...ms,
+          towers: towers,
+          shields: shields,
+          sandstormUntil: sandstormUntil,
+          lastEvent: event
+        }
       });
     }
 
     async function gmResetMathTowers() {
       if (!currentState || currentState.activeGameId !== "MathTowers") return;
+      const ms = currentState.minigameState || {};
       await updateGameState({
-        "minigameState.towers": { wolves: 0, chickens: 0 },
-        "minigameState.shields": { wolves: false, chickens: false },
-        "minigameState.sandstormUntil": { wolves: 0, chickens: 0 },
-        "minigameState.correctAnswers": { wolves: 0, chickens: 0 },
-        "minigameState.wrongAnswers": { wolves: 0, chickens: 0 },
-        "minigameState.lastEvent": null
+        minigameState: {
+          ...ms,
+          towers: { wolves: 0, chickens: 0 },
+          shields: { wolves: false, chickens: false },
+          sandstormUntil: { wolves: 0, chickens: 0 },
+          correctAnswers: { wolves: 0, chickens: 0 },
+          wrongAnswers: { wolves: 0, chickens: 0 },
+          lastEvent: null
+        }
       });
     }
 
@@ -1493,10 +1503,9 @@
     }
 
     async function resetAllReady() {
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, { ready: false }));
-      await batch.commit();
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, { ready: false }));
+      await Promise.all(promises);
     }
 
     async function backToHome() {
@@ -1519,15 +1528,14 @@
       });
       await clearAllVotes();
       await resetAllReady();
-      const snap = await db.collection("players").get();
-      const batch2 = db.batch();
-      snap.forEach(doc => batch2.update(doc.ref, {
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, {
         timeResult: null, timeScore: 0,
         photoChallengeCheckedArray: null, photoChallengeCheckedCount: 0,
         emojiGuess: null,
         mathWrongUntil: 0
       }));
-      await batch2.commit();
+      await Promise.all(promises);
       selectedMgId = "";
       gmTimerStarted = false;
     }
@@ -1562,7 +1570,7 @@
         if (!wrongArr.includes(ms.buzzerName)) {
           wrongArr.push(ms.buzzerName);
         }
-        await db.collection("players").doc(playerDocId(ms.buzzerName)).update({
+        await pb.collection("players").update(playerDocId(ms.buzzerName), {
           emojiGuess: null
         });
 
@@ -1621,10 +1629,9 @@
       const nextMovie = ms.selectedMovies[nextRound - 1];
 
       // Reset player guesses
-      const snap = await db.collection("players").get();
-      const batch = db.batch();
-      snap.forEach(doc => batch.update(doc.ref, { emojiGuess: null }));
-      await batch.commit();
+      const players = await getPlayers();
+      const promises = players.map(p => pb.collection("players").update(p.id, { emojiGuess: null }));
+      await Promise.all(promises);
 
       const newTimerEnd = Date.now() + 180 * 1000; // 3 minutes
 
@@ -1831,7 +1838,7 @@
     }
 
     async function assignTeam(name, team) {
-      await db.collection("players").doc(playerDocId(name)).update({ team, LastAction: new Date().toISOString() });
+      await pb.collection("players").update(playerDocId(name), { team, LastAction: new Date().toISOString() });
     }
 
     async function removePlayerGm(name) {
