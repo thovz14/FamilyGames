@@ -1105,14 +1105,14 @@
         activeGameDescription: mg.description,
         activeGameDuration: mg.duration,
         message: mg.description,
-        timerEnd: null
+        timerEnd: ""
       };
       if (mg.id === "PhotoChallenge") {
         const shuffled = [...PHOTO_CHALLENGE_ITEMS].sort(() => Math.random() - 0.5);
         updates.photoChallengeItems = shuffled.slice(0, 10);
         const players = await getPlayers();
         const promises = players.map(p => pb.collection("players").update(p.id, {
-          photoChallengeCheckedArray: null,
+          photoChallengeCheckedArray: [],
           photoChallengeCheckedCount: 0
         }));
         await Promise.all(promises);
@@ -1145,7 +1145,7 @@
     async function startTimeGuesserChallenge() {
       // Reset all player results first
       const players = await getPlayers();
-      const promises = players.map(p => pb.collection("players").update(p.id, { timeResult: null, timeScore: 0 }));
+      const promises = players.map(p => pb.collection("players").update(p.id, { timeResult: 0, timeScore: 0 }));
       await Promise.all(promises);
 
       // Use timestamp-based countdown so tab switches don't break it
@@ -1156,8 +1156,8 @@
         gamePhase: "countdown",
         countdownValue: 3,
         countdownStartAt: startAt,
-        gameStartTime: null,
-        timerEnd: null,
+        gameStartTime: "",
+        timerEnd: "",
         message: "Maak je klaar... we gaan tellen!"
       });
 
@@ -1216,7 +1216,7 @@
 
       const players = await getPlayers();
       const promises = players.map(p => pb.collection("players").update(p.id, {
-        emojiGuess: null,
+        emojiGuess: "",
         LastAction: new Date().toISOString()
       }));
       await Promise.all(promises);
@@ -1245,7 +1245,7 @@
           revealedLetters: [],
           wrongPlayers: [],
           buzzerName: null,
-          pausedTimeRemaining: null,
+          pausedTimeRemaining: 0,
           lastHintTime: Date.now()
         }
       });
@@ -1367,7 +1367,7 @@
       if (!confirm("Huidige ronde overslaan?")) return;
       const currentRound = currentState.minigameState.round;
       if (currentRound < 5) await startHideAndSeekRound(currentRound + 1);
-      else await updateGameState({ gamePhase: "ended", timerEnd: null });
+      else await updateGameState({ gamePhase: "ended", timerEnd: "" });
     }
 
     async function beginTimer(mg) {
@@ -1400,7 +1400,7 @@
     async function stopMinigame() {
       if (!confirm("Minigame nu stoppen?")) return;
       clearInterval(timerInterval);
-      await updateGameState({ gamePhase: "ended", timerEnd: null });
+      await updateGameState({ gamePhase: "ended", timerEnd: "" });
     }
 
     function renderMathTowersGm(state) {
@@ -1499,7 +1499,7 @@
         ts.chickens += 1;
         msg = "Gelijkspel in Math Towers: beide teams krijgen 1 punt!";
       }
-      await updateGameState({ teamScores: ts, gamePhase: "ended", timerEnd: null, message: msg });
+      await updateGameState({ teamScores: ts, gamePhase: "ended", timerEnd: "", message: msg });
     }
 
     async function resetAllReady() {
@@ -1518,21 +1518,21 @@
         activeGameId: "",
         activeGameName: "",
         activeGameDescription: "",
-        activeGameDuration: null,
-        timerEnd: null,
-        minigameState: null,
+        activeGameDuration: 0,
+        timerEnd: "",
+        minigameState: {},
         countdownValue: 0,
-        countdownStartAt: null,
-        gameStartTime: null,
-        photoChallengeItems: null
+        countdownStartAt: "",
+        gameStartTime: "",
+        photoChallengeItems: []
       });
       await clearAllVotes();
       await resetAllReady();
       const players = await getPlayers();
       const promises = players.map(p => pb.collection("players").update(p.id, {
-        timeResult: null, timeScore: 0,
-        photoChallengeCheckedArray: null, photoChallengeCheckedCount: 0,
-        emojiGuess: null,
+        timeResult: 0, timeScore: 0,
+        photoChallengeCheckedArray: [], photoChallengeCheckedCount: 0,
+        emojiGuess: "",
         mathWrongUntil: 0
       }));
       await Promise.all(promises);
@@ -1571,7 +1571,7 @@
           wrongArr.push(ms.buzzerName);
         }
         await pb.collection("players").update(playerDocId(ms.buzzerName), {
-          emojiGuess: null
+          emojiGuess: ""
         });
 
         // Resume timer by calculating new timerEnd
@@ -1585,7 +1585,7 @@
             status: "playing",
             wrongPlayers: wrongArr,
             buzzerName: null,
-            pausedTimeRemaining: null,
+            pausedTimeRemaining: 0,
             lastHintTime: Date.now() // reset hint timer when resumed
           }
         });
@@ -1630,7 +1630,7 @@
 
       // Reset player guesses
       const players = await getPlayers();
-      const promises = players.map(p => pb.collection("players").update(p.id, { emojiGuess: null }));
+      const promises = players.map(p => pb.collection("players").update(p.id, { emojiGuess: "" }));
       await Promise.all(promises);
 
       const newTimerEnd = Date.now() + 180 * 1000; // 3 minutes
@@ -1647,7 +1647,7 @@
           revealedLetters: [],
           wrongPlayers: [],
           buzzerName: null,
-          pausedTimeRemaining: null,
+          pausedTimeRemaining: 0,
           lastHintTime: Date.now() // reset hint timer
         }
       });
@@ -1678,7 +1678,7 @@
           revealedLetters: [],
           wrongPlayers: [],
           buzzerName: null,
-          pausedTimeRemaining: null,
+          pausedTimeRemaining: 0,
           lastHintTime: Date.now()
         }
       });
@@ -1756,7 +1756,7 @@
         if (currentState.timerEnd) {
           const rem = Math.max(0, currentState.timerEnd - Date.now());
           updates.pausedTimeRemaining = rem;
-          updates.timerEnd = null;
+          updates.timerEnd = "";
         }
       } else {
         if (currentState.pausedTimeRemaining) {
@@ -1776,8 +1776,8 @@
       await updateGameState({
         status: "lobby", isLocked: false, page: 1, message: "", gamePhase: "lobby",
         activeGameId: "", activeGameName: "", activeGameDescription: "",
-        activeGameDuration: null, timerEnd: null, showBetween: false,
-        minigameState: null,
+        activeGameDuration: 0, timerEnd: "", showBetween: false,
+        minigameState: {},
         teamScores: { wolves: 0, chickens: 0 }
       });
     }
@@ -1892,7 +1892,7 @@
             newMs.status = "round_ended";
             updateGameState({
               minigameState: newMs,
-              timerEnd: null,
+              timerEnd: "",
               message: "Tijd is om! Op naar de volgende ronde?"
             });
           } else if (currentState.activeGameId === "Imposter") {
@@ -1902,7 +1902,7 @@
             newMs.status = "round_ended";
             updateGameState({
               minigameState: newMs,
-              timerEnd: null,
+              timerEnd: "",
               message: "Tijd is om! Op naar de volgende ronde?"
             });
           } else {
