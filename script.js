@@ -153,7 +153,7 @@ async function ensureGameState() {
       activeGameName: "",
       activeGameDescription: "",
       activeGameDuration: 0,
-      timerEnd: "",
+      timerEnd: 0,
       showBetween: false,
       roomCode: "",
       teamScores: { wolves: 0, chickens: 0 },
