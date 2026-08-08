@@ -16,13 +16,7 @@
 
   // ── Device fingerprint ────────────────────────────────────
   function markKnownDevice() {
-    if (!localStorage.getItem(DEVICE_KEY_STORAGE)) {
-      localStorage.setItem(DEVICE_KEY_STORAGE, crypto.randomUUID());
-    }
-  }
-
-  function deviceIsKnown() {
-    return Boolean(localStorage.getItem(DEVICE_KEY_STORAGE));
+    // No-op now that OTP is removed
   }
 
   // ── Auth state helpers ────────────────────────────────────
@@ -60,37 +54,11 @@
    */
   async function attemptLogin(email, password) {
     try {
-      if (!deviceIsKnown()) {
-        // 1. Validate credentials first — never send OTP on bad password
-        let preAuth;
-        try {
-          preAuth = await pb.collection('users').authWithPassword(email, password);
-        } catch (_credErr) {
-          return { error: 'Ongeldig e-mailadres of wachtwoord.' };
-        }
-
-        if (!preAuth.record.verified) {
-          pb.authStore.clear();
-          return { error: 'Verifieer eerst je e-mailadres.' };
-        }
-
-        // Credentials OK → clear session, send OTP for new device
-        pb.authStore.clear();
-        const otpResponse = await pb.collection('users').requestOTP(email);
-        return {
-          otp: true,
-          otpId: otpResponse?.id || otpResponse?.otpId || null,
-          email,
-        };
-      }
-
-      // Known device — direct password auth
       const authData = await pb.collection('users').authWithPassword(email, password);
       if (!authData.record.verified) {
         pb.authStore.clear();
         return { error: 'Verifieer eerst je e-mailadres.' };
       }
-      markKnownDevice();
       return { ok: true, record: authData.record };
     } catch (err) {
       console.error('attemptLogin error:', err);
@@ -98,19 +66,7 @@
     }
   }
 
-  /**
-   * Returns: { ok: true } | { error: string }
-   */
-  async function confirmOTP(otpId, code) {
-    try {
-      await pb.collection('users').authWithOTP(otpId, code);
-      markKnownDevice();
-      return { ok: true };
-    } catch (err) {
-      console.error('confirmOTP error:', err);
-      return { error: 'Ongeldige of verlopen code. Probeer opnieuw.' };
-    }
-  }
+  // OTP functionality removed
 
   // ── Expose to global scope ────────────────────────────────
   window.isUserLoggedIn = isUserLoggedIn;
@@ -118,7 +74,7 @@
   window.getDisplayName = getDisplayName;
   window.logoutUser = logoutUser;
   window.attemptLogin = attemptLogin;
-  window.confirmOTP = confirmOTP;
+  window.markKnownDevice = markKnownDevice;
   window.markKnownDevice = markKnownDevice;
 
 })();

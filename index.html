@@ -258,33 +258,7 @@
       color: var(--accent);
     }
 
-    /* OTP Grid */
-    .otp-grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 8px;
-      margin: 16px 0;
-    }
-
-    .otp-digit {
-      aspect-ratio: 1;
-      border: 1.5px solid var(--border);
-      border-radius: 14px;
-      background: var(--bg-surface);
-      color: var(--text);
-      font-size: 22px;
-      font-weight: 800;
-      text-align: center;
-      font-family: 'Outfit', sans-serif;
-      transition: all 0.2s ease;
-      touch-action: manipulation;
-    }
-
-    .otp-digit:focus {
-      outline: none;
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px var(--accent-glow);
-    }
+    /* OTP Grid Removed */
 
     /* Spinner */
     .spinner {
@@ -469,33 +443,7 @@
         </button>
       </div>
 
-      <!-- PANEL 2: OTP verificatie -->
-      <div class="login-panel" id="panelOTP">
-        <p
-          style="font-size: 13.5px; color: var(--text-muted); line-height: 1.6; margin-bottom: 6px; text-align: center;">
-          🔐 Nieuw apparaat gedetecteerd.<br>
-          Voer de 6-cijferige code in die we stuurden naar<br>
-          <strong id="otpEmailDisplay" style="color: var(--accent);">jouw e-mailadres</strong>.
-        </p>
-        <div class="otp-grid" id="otpGrid">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-          <input class="otp-digit" type="text" inputmode="numeric" pattern="[0-9]*" maxlength="1"
-            autocomplete="one-time-code">
-        </div>
-        <button type="button" class="login-btn-primary" id="otpSubmitBtn">
-          Bevestigen →
-        </button>
-        <div class="login-back-link" id="otpBackBtn">← Terug naar inloggen</div>
-      </div>
+      <!-- OTP Panel Removed -->
 
     </div>
   </div>
@@ -573,53 +521,7 @@
     // Init icon on load
     applyTheme(document.documentElement.dataset.theme || 'light');
 
-    // ── OTP helpers ───────────────────────────────────────────
-    let pendingOtpId = null;
-    let pendingOtpEmail = null;
-
-    function showPanel(panelId) {
-      document.querySelectorAll('.login-panel').forEach(p => p.classList.remove('active'));
-      document.getElementById(panelId).classList.add('active');
-      clearLoginError();
-    }
-
-    function showLoginError(msg) {
-      const el = document.getElementById('loginError');
-      el.textContent = msg;
-      el.classList.add('show');
-    }
-
-    function clearLoginError() {
-      document.getElementById('loginError').classList.remove('show');
-    }
-
-    function setLoginSubtitle(txt) {
-      document.getElementById('loginSubtitle').textContent = txt;
-    }
-
-    // OTP auto-advance
-    function initOtpInputs() {
-      const inputs = Array.from(document.querySelectorAll('.otp-digit'));
-      inputs.forEach((inp, i) => {
-        inp.addEventListener('input', () => {
-          inp.value = inp.value.replace(/[^0-9]/g, '').slice(-1);
-          if (inp.value && i < inputs.length - 1) inputs[i + 1].focus();
-        });
-        inp.addEventListener('keydown', e => {
-          if (e.key === 'Backspace' && !inp.value && i > 0) inputs[i - 1].focus();
-        });
-      });
-    }
-
-    function getOtpCode() {
-      return Array.from(document.querySelectorAll('.otp-digit'))
-        .map(i => i.value.trim()).join('');
-    }
-
-    function clearOtpInputs() {
-      document.querySelectorAll('.otp-digit').forEach(i => i.value = '');
-      document.querySelector('.otp-digit')?.focus();
-    }
+    // OTP helpers removed
 
     // ── Login form ────────────────────────────────────────────
     document.getElementById('loginForm').addEventListener('submit', async (e) => {
@@ -640,14 +542,7 @@
 
         const result = await attemptLogin(email, password);
 
-        if (result.otp) {
-          pendingOtpId = result.otpId;
-          pendingOtpEmail = result.email;
-          document.getElementById('otpEmailDisplay').textContent = result.email;
-          setLoginSubtitle('Verificatiecode');
-          showPanel('panelOTP');
-          clearOtpInputs();
-        } else if (result.ok) {
+        if (result.ok) {
           await onLoginSuccess();
           return; // don't reset btn — page will navigate
         } else {
@@ -684,50 +579,7 @@
       }
     });
 
-    // ── OTP confirm ───────────────────────────────────────────
-    document.getElementById('otpSubmitBtn').addEventListener('click', async () => {
-      const code = getOtpCode();
-      if (code.length !== 6) {
-        showLoginError('Voer alle 6 cijfers in.');
-        return;
-      }
-      if (!pendingOtpId) {
-        showLoginError('Sessie verlopen. Probeer opnieuw.');
-        showPanel('panelPassword');
-        return;
-      }
-
-      const btn = document.getElementById('otpSubmitBtn');
-      const orig = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = `<span class="spinner"></span> Controleren...`;
-      clearLoginError();
-
-      try {
-        const result = await confirmOTP(pendingOtpId, code);
-        if (result.ok) {
-          await onLoginSuccess();
-          return;
-        } else {
-          showLoginError(result.error || 'Ongeldige code.');
-          clearOtpInputs();
-        }
-      } catch (err) {
-        console.error('OTP handler error:', err);
-        showLoginError('Er is een fout opgetreden. Probeer opnieuw.');
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = orig;
-      }
-    });
-
-    // Back button
-    document.getElementById('otpBackBtn').addEventListener('click', () => {
-      pendingOtpId = null;
-      pendingOtpEmail = null;
-      setLoginSubtitle('Sign in with your Wonder ID');
-      showPanel('panelPassword');
-    });
+    // OTP confirm removed
 
     // ── Post-login logic ──────────────────────────────────────
     async function onLoginSuccess() {
@@ -751,7 +603,6 @@
 
     // ── Init on load ──────────────────────────────────────────
     document.addEventListener('DOMContentLoaded', async () => {
-      initOtpInputs();
 
       if (isUserLoggedIn()) {
         document.getElementById('loginOverlay').classList.remove('show');
